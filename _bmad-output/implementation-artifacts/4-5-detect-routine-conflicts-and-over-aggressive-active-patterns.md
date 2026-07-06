@@ -1,0 +1,51 @@
+# Story 4.5: Detect Routine Conflicts and Over-Aggressive Active Patterns
+
+Status: done
+
+## Story
+
+As a user with current routine information or sensitivity signals, I want Routinelle to detect routine conflicts, so that I avoid product combinations that may be too aggressive.
+
+## Acceptance Criteria
+
+1. Conflict checks flag duplicate actives, too many actives, and barrier-risk active patterns.
+2. Conflict results can attach to routine steps.
+3. Strong conflicts can trigger caution states.
+4. Conflict checks are testable independently of UI.
+
+## Tasks / Subtasks
+
+- [x] Add conflict domain model.
+- [x] Add independent conflict-check helper.
+- [x] Attach step-level conflict refs and caution messages during generation.
+- [x] Verify with `npm run lint` and `npm run build`.
+
+## Dev Agent Record
+
+### Agent Model Used
+
+GPT-5 Codex
+
+### Debug Log References
+
+- `npm run lint` passed.
+- `npm run build` passed.
+
+### Completion Notes List
+
+- Added duplicate-active, too-many-actives, current-routine, and barrier-risk active pattern checks.
+- Conflict logic is independent of UI components.
+
+### File List
+
+- `routinelle/src/lib/domain/routine.ts`
+- `routinelle/src/lib/recommendation/conflict-checks.ts`
+- `routinelle/src/lib/recommendation/routine-generator.ts`
+
+### Change Log
+
+- 2026-05-19: Completed Story 4.5 conflict checks.
+
+### Review Findings
+
+- Clean review - no unresolved findings.

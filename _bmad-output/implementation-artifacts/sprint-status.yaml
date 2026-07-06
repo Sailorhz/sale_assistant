@@ -1,0 +1,103 @@
+# generated: 2026-05-14
+# last_updated: 2026-05-19
+# project: sale_assistant
+# project_key: NOKEY
+# tracking_system: file-system
+# story_location: _bmad-output/implementation-artifacts
+#
+# STATUS DEFINITIONS:
+# ==================
+# Epic Status:
+#   - backlog: Epic not yet started
+#   - in-progress: Epic actively being worked on
+#   - done: All stories in epic completed
+#
+# Epic Status Transitions:
+#   - backlog -> in-progress: Automatically when first story is created (via create-story)
+#   - in-progress -> done: Manually when all stories reach 'done' status
+#
+# Story Status:
+#   - backlog: Story only exists in epic file
+#   - ready-for-dev: Story file created in stories folder
+#   - in-progress: Developer actively working on implementation
+#   - review: Ready for code review (via Dev's code-review workflow)
+#   - done: Story completed
+#
+# Retrospective Status:
+#   - optional: Can be completed but not required
+#   - done: Retrospective has been completed
+#
+# WORKFLOW NOTES:
+# ===============
+# - Epic transitions to 'in-progress' automatically when first story is created
+# - Stories can be worked in parallel if team capacity allows
+# - Developer typically creates next story after previous one is 'done' to incorporate learnings
+# - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
+
+generated: 2026-05-14
+last_updated: 2026-05-19
+project: sale_assistant
+project_key: NOKEY
+tracking_system: file-system
+story_location: _bmad-output/implementation-artifacts
+
+development_status:
+  epic-1: done
+  1-1-initialize-routinelle-app-foundation: done
+  1-2-build-mobile-first-public-shell-and-sample-recommendation-preview: done
+  1-3-configure-supabase-auth-and-session-boundary: done
+  1-4-add-privacy-consent-and-data-use-summary: done
+  1-5-implement-account-data-view-and-profile-deletion-request: done
+  1-6-establish-baseline-accessibility-and-responsive-standards: done
+  epic-1-retrospective: done
+  epic-2: done
+  2-1-build-onboarding-questionnaire-flow: done
+  2-2-capture-acne-sensitivity-irritation-and-barrier-risk-signals: done
+  2-3-support-not-sure-and-low-confidence-answers: done
+  2-4-add-optional-current-routine-entry-and-skip-path: done
+  2-5-generate-and-display-skin-profile-summary: done
+  2-6-allow-profile-input-updates-after-first-routine: done
+  epic-2-retrospective: optional
+  epic-3: done
+  3-1-create-catalog-database-schema-and-product-domain-model: done
+  3-2-build-catalog-product-validation-and-eligibility-rules: done
+  3-3-build-admin-product-create-and-edit-workflow: done
+  3-4-add-publish-unpublish-review-and-freshness-controls: done
+  3-5-manage-recommendation-tags-caution-tags-and-approved-copy-blocks: done
+  3-6-preserve-catalog-and-rule-version-context: done
+  3-7-show-catalog-coverage-gaps: done
+  epic-3-retrospective: optional
+  epic-4: done
+  4-1-define-display-ready-routine-contract-and-persistence-foundation: done
+  4-2-generate-core-am-pm-starter-routine-structure: done
+  4-3-match-eligible-products-by-routine-step-budget-and-market: done
+  4-4-implement-no-safe-match-and-catalog-gap-handling: done
+  4-5-detect-routine-conflicts-and-over-aggressive-active-patterns: done
+  4-6-implement-gentle-start-recommendation-variant: done
+  4-7-add-safety-and-claim-guardrail-validation-before-display: done
+  4-8-persist-generated-routine-with-catalog-and-rule-version-context: done
+  epic-4-retrospective: optional
+  epic-5: done
+  5-1-build-approved-explanation-copy-and-rationale-builder: done
+  5-2-display-routine-step-explanations: done
+  5-3-display-ingredient-and-skin-fit-rationale-for-product-options: done
+  5-4-show-cautions-misfit-reasons-and-conflict-explanations: done
+  5-5-display-gentle-start-and-safety-guidance-explanations: done
+  5-6-add-recommendation-neutrality-and-commercial-firewall-messaging: done
+  5-7-trace-recommendation-explanations-to-source-metadata: done
+  epic-5-retrospective: optional
+  epic-6: done
+  6-1-save-generated-routine-to-user-account: done
+  6-2-view-saved-routine-details: done
+  6-3-track-product-link-clicks-without-affecting-ranking: done
+  6-4-create-7-day-check-in-flow: done
+  6-5-update-profile-signals-from-check-in-outcomes: done
+  6-6-suggest-adjusted-guidance-or-product-alternative-after-check-in: done
+  epic-6-retrospective: optional
+  epic-7: done
+  7-1-implement-privacy-safe-analytics-event-framework: done
+  7-2-track-onboarding-and-routine-generation-completion: done
+  7-3-track-routine-saves-product-clicks-and-check-in-completion: done
+  7-4-log-safety-events-and-professional-care-guidance-triggers: done
+  7-5-display-admin-safety-and-analytics-review-views: done
+  epic-7-retrospective: optional
