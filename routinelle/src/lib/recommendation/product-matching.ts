@@ -24,6 +24,22 @@ function stepMatches(product: CatalogProduct, role: RoutineStepRole) {
   return product.routineStep === "support";
 }
 
+/**
+ * 0 when the product's price band matches the user's chosen budget (or the user
+ * has no explicit preference), 1 otherwise. Used to rank matching-band options
+ * ahead of low-band backfill, without excluding low-band options entirely --
+ * hiding affordable options would violate the neutrality/commercial-firewall
+ * principle, so budgetMatches still lets them through; this only fixes the
+ * ordering so they no longer crowd out the band the user actually asked for.
+ */
+function budgetRank(product: CatalogProduct, profile: OnboardingAnswers) {
+  if (profile.budget === "notSure" || !profile.budget || profile.budget === "flexible") {
+    return 0;
+  }
+
+  return product.priceBand === profile.budget ? 0 : 1;
+}
+
 function skinFitMatches(product: CatalogProduct, profile: OnboardingAnswers) {
   const sensitive =
     profile.sensitivity === "oftenSensitive" ||
@@ -49,9 +65,11 @@ export function matchProductOptions(
     .filter((product) => budgetMatches(product, profile))
     .filter((product) => skinFitMatches(product, profile))
     .sort((a, b) => {
+      const rankA = budgetRank(a, profile);
+      const rankB = budgetRank(b, profile);
       const priceA = a.price?.amountMinor ?? Number.MAX_SAFE_INTEGER;
       const priceB = b.price?.amountMinor ?? Number.MAX_SAFE_INTEGER;
-      return priceA - priceB || a.productName.localeCompare(b.productName);
+      return rankA - rankB || priceA - priceB || a.productName.localeCompare(b.productName);
     })
     .slice(0, 3)
     .map((product) => ({
