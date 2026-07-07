@@ -1,14 +1,16 @@
-import type { RoutineConflict, RoutineStep } from "@/lib/domain/routine";
+import type { RoutineConflict } from "@/lib/domain/routine";
 import type { OnboardingAnswers } from "@/lib/domain/skin-profile";
 
-export function detectRoutineConflicts(
-  profile: OnboardingAnswers,
-  steps: RoutineStep[],
-): RoutineConflict[] {
+export function detectRoutineConflicts(profile: OnboardingAnswers): RoutineConflict[] {
   const conflicts: RoutineConflict[] = [];
   const activeCount = profile.currentRoutineProductTypes.filter((type) =>
     ["exfoliant", "retinoid", "blemishActive", "vitaminCBrightening"].includes(type),
   ).length;
+  // Barrier-risk signals (currentlyUncomfortable sensitivity, stinging/burning, redness,
+  // flaking, recent strong actives) are a subset of shouldUseGentleStart's triggers in
+  // gentle-start.ts, and gentle-start already drops the support step and adds its own
+  // routine-level safety messaging. So a barrier-risk-specific conflict here would never
+  // find a support step to attach to — the case is handled upstream instead.
   const barrierRisk =
     profile.sensitivity === "currentlyUncomfortable" ||
     profile.irritationBarrierSignals.some((signal) =>
@@ -28,15 +30,6 @@ export function detectRoutineConflicts(
       code: "duplicate-active",
       severity: "caution",
       message: "Current routine includes exfoliant and retinoid-style products.",
-    });
-  }
-
-  if (barrierRisk && steps.some((step) => step.role === "support")) {
-    conflicts.push({
-      code: "barrier-risk-active-pattern",
-      severity: "block",
-      message: "Barrier-risk answers require a conservative support step.",
-      stepId: steps.find((step) => step.role === "support")?.id,
     });
   }
 

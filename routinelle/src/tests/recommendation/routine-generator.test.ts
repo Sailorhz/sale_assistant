@@ -153,4 +153,31 @@ describe("generateStarterRoutine", () => {
     expect(steps.every((step) => step.productOptions.length > 0)).toBe(true);
     expect(routineToApiResult(sampleRoutineContract).ok).toBe(true);
   });
+
+  it("never includes a support step for a gentle-start (barrier-risk) profile", () => {
+    const products: CatalogProduct[] = [
+      baseProduct,
+      { ...baseProduct, id: "moisturizer-1", productName: "Moisture", routineStep: "hydrate", productCategory: "moisturizer" },
+      { ...baseProduct, id: "sunscreen-1", productName: "SPF", routineStep: "protect", productCategory: "sunscreen" },
+      { ...baseProduct, id: "support-1", productName: "Serum", routineStep: "support", productCategory: "serum" },
+    ];
+    const barrierRiskProfile: OnboardingAnswers = {
+      ...completeProfile,
+      concerns: ["blemishes"],
+      sensitivity: "currentlyUncomfortable",
+      irritationBarrierSignals: ["redness"],
+    };
+
+    const routine = generateStarterRoutine({
+      profile: barrierRiskProfile,
+      products,
+      versionContext,
+      generatedAt: "2026-05-19T00:00:00.000Z",
+    });
+    const steps = routine.sections.flatMap((section) => section.steps);
+
+    expect(routine.variant).toBe("gentle-start");
+    expect(steps.some((step) => step.role === "support")).toBe(false);
+    expect(routine.safetyMessages.length).toBeGreaterThan(0);
+  });
 });

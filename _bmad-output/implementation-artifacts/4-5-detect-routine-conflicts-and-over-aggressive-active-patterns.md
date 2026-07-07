@@ -45,7 +45,19 @@ GPT-5 Codex
 ### Change Log
 
 - 2026-05-19: Completed Story 4.5 conflict checks.
+- 2026-07-07: Removed the barrier-risk-active-pattern check. It required a `support`
+  step to exist, but every profile condition that sets `barrierRisk` is a subset of
+  `shouldUseGentleStart`'s trigger conditions (gentle-start.ts), and gentle-start always
+  drops the support step. The check was therefore unreachable dead code — AC #1's
+  "barrier-risk active patterns" clause was never actually deliverable through
+  `generateStarterRoutine`. Gentle-start's own routine-level safety messaging covers the
+  intended case instead. Added a regression test asserting gentle-start profiles never
+  produce a support step, plus a dedicated conflict-checks.test.ts covering the two
+  remaining checks (previously untested in isolation).
 
 ### Review Findings
 
 - Clean review - no unresolved findings.
+- 2026-07-07 follow-up review: found and removed the unreachable barrier-risk-active-pattern
+  check (see Change Log). AC #1 now reads as fulfilled by duplicate-active and
+  too-many-actives only; barrier-risk profiles are handled via the gentle-start variant.

@@ -39,7 +39,6 @@ export type RoutineConflict = {
   code:
     | "duplicate-active"
     | "too-many-actives"
-    | "barrier-risk-active-pattern"
     | "current-routine-conflict";
   severity: RoutineConflictSeverity;
   message: string;

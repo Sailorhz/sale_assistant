@@ -91,7 +91,7 @@ export function generateStarterRoutine({
     { id: "pm", title: "PM", steps: pmSteps },
   ];
   const flatSteps = sections.flatMap((section) => section.steps);
-  const conflicts = detectRoutineConflicts(profile, flatSteps);
+  const conflicts = detectRoutineConflicts(profile);
   const stepsWithConflicts = flatSteps.map((step) => ({
     ...step,
     conflictRefs: conflicts.filter((conflict) => conflict.stepId === step.id),
