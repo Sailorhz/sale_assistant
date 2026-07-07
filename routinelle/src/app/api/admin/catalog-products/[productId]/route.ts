@@ -2,6 +2,7 @@ import { apiError, apiOk } from "@/lib/api/response";
 import {
   catalogProductInputToRow,
   parseCatalogProductInput,
+  validateCatalogProductForSave,
   validateCatalogProductInput,
 } from "@/lib/catalog/catalog-product-input";
 import { isCatalogAdmin } from "@/lib/supabase/catalog-admin";
@@ -42,16 +43,18 @@ export async function PUT(
   }
 
   const input = parseCatalogProductInput(body);
-  const eligibility = validateCatalogProductInput(input);
+  const saveValidation = validateCatalogProductForSave(input);
 
-  if (eligibility.status === "blocked") {
+  if (saveValidation.status === "blocked") {
     return apiError(
       "validation",
-      "Catalog product is not recommendation-eligible.",
+      "Catalog product is missing required fields.",
       400,
-      eligibility.issues,
+      saveValidation.issues,
     );
   }
+
+  const eligibility = validateCatalogProductInput(input);
 
   try {
     const { supabase, isAdmin } = await getAdminContext();

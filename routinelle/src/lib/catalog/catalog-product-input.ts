@@ -1,4 +1,8 @@
-import { evaluateCatalogProductEligibility } from "@/lib/catalog/catalog-product-validation";
+import {
+  evaluateCatalogProductEligibility,
+  validateCatalogProductMetadata,
+} from "@/lib/catalog/catalog-product-validation";
+import type { CatalogEligibilityResult } from "@/lib/catalog/catalog-product-validation";
 import type {
   CatalogAvailabilityStatus,
   CatalogDataFreshnessStatus,
@@ -237,6 +241,30 @@ export function catalogProductInputToProduct(
 
 export function validateCatalogProductInput(input: CatalogProductInput) {
   return evaluateCatalogProductEligibility(catalogProductInputToProduct(input));
+}
+
+/**
+ * Whether a product has enough structural data to be saved at all -- brand,
+ * name, INCI list, etc. Deliberately excludes lifecycle checks (publication
+ * status, availability, freshness, formula status, caution tags): those
+ * answer "is this eligible for live recommendations right now" (see
+ * evaluateCatalogProductEligibility), not "is this valid enough to save."
+ * Conflating the two made it impossible to ever save a draft, a
+ * review-flagged product, or an unpublish.
+ */
+export function validateCatalogProductForSave(
+  input: CatalogProductInput,
+): CatalogEligibilityResult {
+  const issues = validateCatalogProductMetadata(
+    catalogProductInputToProduct(input),
+  );
+
+  return {
+    status: issues.some((item) => item.severity === "error")
+      ? "blocked"
+      : "eligible",
+    issues,
+  };
 }
 
 export function catalogProductToInput(product: CatalogProduct): CatalogProductInput {
