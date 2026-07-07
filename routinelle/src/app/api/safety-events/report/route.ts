@@ -41,6 +41,6 @@ export async function POST(request: Request) {
 
     return apiOk({ logged: true });
   } catch {
-    return apiOk({ logged: false });
+    return apiError("system-error", "Safety event could not be logged.", 500);
   }
 }

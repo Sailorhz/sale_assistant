@@ -54,7 +54,9 @@ export async function POST(request: Request) {
         category: "check_in_professional_care",
         severity: "high",
         context: { routineId: input.routineId },
-      }).catch(() => undefined);
+      }).catch((error) => {
+        console.error("Failed to log safety event for check-in", error);
+      });
     }
 
     return apiOk({ checkIn, guidance });
