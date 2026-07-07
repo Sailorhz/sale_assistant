@@ -1,8 +1,10 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 
+import { RoutineView } from "@/components/routinelle/routine/routine-view";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -11,6 +13,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import type { GeneratedRoutine } from "@/lib/domain/routine";
 import {
   onboardingQuestions,
   type OnboardingOptionValue,
@@ -26,6 +29,7 @@ import {
   emptyOnboardingAnswers,
   type OnboardingAnswers,
 } from "@/lib/domain/skin-profile";
+import { buildRoutineExplanationBundle } from "@/lib/explanations/rationale-builder";
 import { cn } from "@/lib/utils";
 import {
   validateOnboardingAnswers,
@@ -48,6 +52,19 @@ type ProfileSaveStatus =
 
 type ProfileSaveState = {
   status: ProfileSaveStatus;
+  message: string | null;
+};
+
+type RoutineGenerationState =
+  | { status: "idle" }
+  | { status: "generating" }
+  | { status: "ready"; routine: GeneratedRoutine }
+  | { status: "error"; message: string };
+
+type RoutineSaveStatus = "idle" | "saving" | "saved" | "auth-required" | "error";
+
+type RoutineSaveState = {
+  status: RoutineSaveStatus;
   message: string | null;
 };
 
@@ -228,6 +245,14 @@ export function OnboardingFlow() {
     status: "idle",
     message: null,
   });
+  const [routineState, setRoutineState] = useState<RoutineGenerationState>({
+    status: "idle",
+  });
+  const [routineSaveState, setRoutineSaveState] = useState<RoutineSaveState>({
+    status: "idle",
+    message: null,
+  });
+  const router = useRouter();
 
   const visibleQuestions = useMemo(() => getVisibleQuestions(answers), [answers]);
   const safeCurrentIndex = Math.min(currentIndex, visibleQuestions.length - 1);
@@ -304,6 +329,79 @@ export function OnboardingFlow() {
     }
   }
 
+  async function generateRoutine() {
+    setRoutineState({ status: "generating" });
+    setRoutineSaveState({ status: "idle", message: null });
+
+    try {
+      const response = await fetch("/api/routines/generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ profile: answers }),
+      });
+      const payload = (await response.json()) as {
+        ok?: boolean;
+        data?: { routine: GeneratedRoutine };
+        error?: { message?: string };
+      };
+
+      if (response.ok && payload.ok && payload.data) {
+        setRoutineState({ status: "ready", routine: payload.data.routine });
+        return;
+      }
+
+      setRoutineState({
+        status: "error",
+        message: payload.error?.message ?? "Routine could not be generated.",
+      });
+    } catch {
+      setRoutineState({
+        status: "error",
+        message: "Routine could not be generated.",
+      });
+    }
+  }
+
+  async function saveRoutine(routine: GeneratedRoutine) {
+    setRoutineSaveState({ status: "saving", message: "Saving routine..." });
+
+    try {
+      const response = await fetch("/api/routines/save", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ routine }),
+      });
+      const payload = (await response.json()) as {
+        ok?: boolean;
+        data?: { routine: GeneratedRoutine };
+        error?: { code?: string; message?: string };
+      };
+
+      if (response.ok && payload.ok && payload.data) {
+        router.push(`/routines/${payload.data.routine.id}`);
+        return;
+      }
+
+      if (payload.error?.code === "auth-required") {
+        setRoutineSaveState({
+          status: "auth-required",
+          message: "Sign in to save this routine to your account.",
+        });
+        return;
+      }
+
+      setRoutineSaveState({
+        status: "error",
+        message: payload.error?.message ?? "Routine could not be saved.",
+      });
+    } catch {
+      setRoutineSaveState({
+        status: "error",
+        message: "Routine could not be saved.",
+      });
+    }
+  }
+
   function editQuestion(questionId: OnboardingQuestionId) {
     const nextIndex = getVisibleQuestions(answers).findIndex(
       (question) => question.id === questionId,
@@ -314,6 +412,8 @@ export function OnboardingFlow() {
       setError(null);
       setIsComplete(false);
       setProfileSaveState({ status: "idle", message: null });
+      setRoutineState({ status: "idle" });
+      setRoutineSaveState({ status: "idle", message: null });
     }
   }
 
@@ -476,12 +576,77 @@ export function OnboardingFlow() {
 
           <CardContent className="space-y-6">
             {isComplete ? (
-              <SummarySection
-                summary={summary}
-                needsRoutineRegeneration={needsRoutineRegeneration}
-                saveState={profileSaveState}
-                onEdit={editQuestion}
-              />
+              <div className="space-y-6">
+                <SummarySection
+                  summary={summary}
+                  needsRoutineRegeneration={needsRoutineRegeneration}
+                  saveState={profileSaveState}
+                  onEdit={editQuestion}
+                />
+
+                {routineState.status === "ready" ? (
+                  <div className="space-y-4 border-t border-[#d8d0c3] pt-6">
+                    <RoutineView
+                      routine={routineState.routine}
+                      explanations={buildRoutineExplanationBundle(
+                        routineState.routine,
+                        answers,
+                      )}
+                    />
+                    {routineState.routine.state !== "safety-blocked" ? (
+                      <div className="space-y-3">
+                        <Button
+                          type="button"
+                          onClick={() => saveRoutine(routineState.routine)}
+                          disabled={routineSaveState.status === "saving"}
+                          className="rounded-lg bg-[#31463a] text-white hover:bg-[#26372e]"
+                        >
+                          {routineSaveState.status === "saving"
+                            ? "Saving..."
+                            : "Save this routine"}
+                        </Button>
+                        {routineSaveState.message ? (
+                          <p
+                            className="text-sm leading-6 text-[#53685d]"
+                            role="status"
+                          >
+                            {routineSaveState.message}
+                            {routineSaveState.status === "auth-required" ? (
+                              <>
+                                {" "}
+                                <Link
+                                  href="/auth/login"
+                                  className="font-semibold underline underline-offset-4"
+                                >
+                                  Sign in
+                                </Link>
+                              </>
+                            ) : null}
+                          </p>
+                        ) : null}
+                      </div>
+                    ) : null}
+                  </div>
+                ) : (
+                  <div className="space-y-3 border-t border-[#d8d0c3] pt-6">
+                    <Button
+                      type="button"
+                      onClick={generateRoutine}
+                      disabled={routineState.status === "generating"}
+                      className="rounded-lg bg-[#31463a] text-white hover:bg-[#26372e]"
+                    >
+                      {routineState.status === "generating"
+                        ? "Generating your routine..."
+                        : "Generate my routine"}
+                    </Button>
+                    {routineState.status === "error" ? (
+                      <p className="text-sm text-[#8a3b2f]" role="alert">
+                        {routineState.message}
+                      </p>
+                    ) : null}
+                  </div>
+                )}
+              </div>
             ) : currentQuestion.kind === "single" ? (
               <div
                 className="grid gap-3"
