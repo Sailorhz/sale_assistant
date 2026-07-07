@@ -1,0 +1,9 @@
+#!/bin/sh
+set -e
+
+cd "$(git rev-parse --show-toplevel)/routinelle"
+
+echo "pre-push: running lint, typecheck, and tests..."
+npm run lint
+npm run typecheck
+npm test
