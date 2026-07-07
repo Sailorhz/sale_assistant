@@ -78,6 +78,10 @@ async function Content() {
     supabase.from("analytics_events").select("*", { count: "exact", head: true }),
     supabase.from("safety_events").select("*", { count: "exact", head: true }),
   ]);
+
+  if (analytics.error) throw analytics.error;
+  if (safety.error) throw safety.error;
+
   const counts: CountRow[] = [
     { count: analytics.count ?? 0 },
     { count: safety.count ?? 0 },
