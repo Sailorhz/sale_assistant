@@ -53,6 +53,19 @@ export async function POST(request: Request) {
 
   try {
     const supabase = hasEnvVars ? await createClient() : null;
+
+    // The client-supplied catalog path is a local-dev convenience only.
+    // In production the catalog must come from the database, never the
+    // request body — enforce that explicitly rather than relying on
+    // env vars happening to be set.
+    if (!supabase && process.env.NODE_ENV === "production") {
+      return apiError(
+        "catalog-unavailable",
+        "Routine generation is temporarily unavailable.",
+        503,
+      );
+    }
+
     const products = supabase
       ? await listPublishedCatalogProducts(supabase)
       : parseProducts(body.products);
