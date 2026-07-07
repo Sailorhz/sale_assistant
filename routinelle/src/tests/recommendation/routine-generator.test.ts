@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import type { CatalogProduct } from "@/lib/domain/catalog-product";
 import { emptyOnboardingAnswers } from "@/lib/domain/skin-profile";
+import type { OnboardingAnswers } from "@/lib/domain/skin-profile";
 import { generateStarterRoutine } from "@/lib/recommendation/routine-generator";
 import { routineToApiResult, sampleRoutineContract } from "@/lib/recommendation/routine-contract";
 
@@ -87,7 +88,7 @@ export const routineGeneratorFixtures = {
   }),
 };
 
-const completeProfile = {
+const completeProfile: OnboardingAnswers = {
   ...emptyOnboardingAnswers,
   skinType: "balanced",
   concerns: ["hydration"],
@@ -98,7 +99,7 @@ const completeProfile = {
   currentRoutineChoice: "skip",
   budget: "low",
   localMarket: "france",
-} as const;
+};
 
 describe("generateStarterRoutine", () => {
   it("returns no-safe-match and preserves the profile snapshot when no products match", () => {
