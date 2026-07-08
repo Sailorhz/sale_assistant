@@ -3,6 +3,7 @@ import type { CatalogProduct } from "@/lib/domain/catalog-product";
 import type { RoutineVersionContext } from "@/lib/domain/version-context";
 import { generateStarterRoutine } from "@/lib/recommendation/routine-generator";
 import { listPublishedCatalogProducts } from "@/lib/supabase/catalog-products";
+import { logSafetyEvent } from "@/lib/supabase/routine-actions";
 import { createClient } from "@/lib/supabase/server";
 import { getLatestPublishedRoutineVersionContext } from "@/lib/supabase/version-context";
 import { hasEnvVars } from "@/lib/utils";
@@ -86,6 +87,22 @@ export async function POST(request: Request) {
       products,
       versionContext,
     });
+
+    if (routine.state === "safety-blocked" && supabase) {
+      const { data } = await supabase.auth.getClaims();
+      const userId = data?.claims?.sub ?? null;
+
+      await logSafetyEvent(supabase, {
+        userId,
+        routineId: null,
+        productId: null,
+        category: "onboarding_professional_care",
+        severity: "high",
+        context: { variant: routine.variant },
+      }).catch((error) => {
+        console.error("Failed to log safety event for onboarding", error);
+      });
+    }
 
     return apiOk({ routine });
   } catch {
