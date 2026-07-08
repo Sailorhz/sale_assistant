@@ -67,7 +67,26 @@ async function Content({
     redirect(`/auth/login?next=/routines/${routineId}`);
   }
 
-  const routine = await getGeneratedRoutine(supabase, routineId);
+  let routine;
+  try {
+    routine = await getGeneratedRoutine(supabase, routineId);
+  } catch {
+    return (
+      <main className="min-h-screen bg-[#f7f4ef] px-4 py-8 text-[#1f2a24]">
+        <Card className="mx-auto max-w-3xl rounded-lg border-[#d8d0c3] bg-white/85 shadow-none">
+          <CardHeader>
+            <CardTitle>Routine not found</CardTitle>
+            <CardDescription>
+              This routine does not exist, or is not available on your
+              account. <Link href="/account" className="underline underline-offset-4">Go to your account</Link> to
+              view your saved routines.
+            </CardDescription>
+          </CardHeader>
+        </Card>
+      </main>
+    );
+  }
+
   const explanations = buildRoutineExplanationBundle(
     routine,
     routine.profileSnapshot ?? emptyOnboardingAnswers,
