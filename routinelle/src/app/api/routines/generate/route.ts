@@ -2,6 +2,7 @@ import { apiError, apiOk } from "@/lib/api/response";
 import type { CatalogProduct } from "@/lib/domain/catalog-product";
 import type { RoutineVersionContext } from "@/lib/domain/version-context";
 import { generateStarterRoutine } from "@/lib/recommendation/routine-generator";
+import { rateLimitResponse } from "@/lib/rate-limit";
 import { listPublishedCatalogProducts } from "@/lib/supabase/catalog-products";
 import { logSafetyEvent } from "@/lib/supabase/routine-actions";
 import { createClient } from "@/lib/supabase/server";
@@ -33,6 +34,12 @@ function parseVersionContext(value: unknown): RoutineVersionContext {
 }
 
 export async function POST(request: Request) {
+  const rateLimited = await rateLimitResponse(request, "routines-generate");
+
+  if (rateLimited) {
+    return rateLimited;
+  }
+
   let body: Record<string, unknown>;
 
   try {

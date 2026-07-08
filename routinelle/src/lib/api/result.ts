@@ -3,7 +3,8 @@ export type ApiErrorCode =
   | "catalog-unavailable"
   | "permission-denied"
   | "validation"
-  | "system-error";
+  | "system-error"
+  | "rate-limited";
 
 export type ApiError = {
   code: ApiErrorCode;

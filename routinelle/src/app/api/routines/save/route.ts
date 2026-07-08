@@ -1,6 +1,7 @@
 import { apiError, apiOk } from "@/lib/api/response";
 import { buildAnalyticsEvent } from "@/lib/analytics/events";
 import type { GeneratedRoutine } from "@/lib/domain/routine";
+import { rateLimitResponse } from "@/lib/rate-limit";
 import { persistGeneratedRoutine } from "@/lib/supabase/generated-routines";
 import { trackAnalyticsEvent } from "@/lib/supabase/routine-actions";
 import { createClient } from "@/lib/supabase/server";
@@ -17,6 +18,11 @@ function hasPersistableVersionContext(routine: GeneratedRoutine) {
 }
 
 export async function POST(request: Request) {
+  const ipRateLimitResponse = await rateLimitResponse(request, "routines-save-ip");
+  if (ipRateLimitResponse) {
+    return ipRateLimitResponse;
+  }
+
   if (!hasEnvVars) {
     return apiError("auth-required", "Sign in to save routines.", 401);
   }
@@ -47,6 +53,11 @@ export async function POST(request: Request) {
 
     if (error || !userId) {
       return apiError("auth-required", "Sign in to save routines.", 401);
+    }
+
+    const userRateLimitResponse = await rateLimitResponse(request, "routines-save-user", userId);
+    if (userRateLimitResponse) {
+      return userRateLimitResponse;
     }
 
     const routine = await persistGeneratedRoutine(supabase, userId, body.routine);

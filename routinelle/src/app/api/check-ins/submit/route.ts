@@ -2,6 +2,7 @@ import { apiError, apiOk } from "@/lib/api/response";
 import { buildAnalyticsEvent } from "@/lib/analytics/events";
 import type { RoutineCheckInInput } from "@/lib/domain/check-in";
 import { adjustedGuidanceFromCheckIn } from "@/lib/domain/check-in";
+import { rateLimitResponse } from "@/lib/rate-limit";
 import {
   logSafetyEvent,
   submitRoutineCheckIn,
@@ -11,6 +12,11 @@ import { createClient } from "@/lib/supabase/server";
 import { hasEnvVars } from "@/lib/utils";
 
 export async function POST(request: Request) {
+  const ipRateLimitResponse = await rateLimitResponse(request, "check-ins-submit-ip");
+  if (ipRateLimitResponse) {
+    return ipRateLimitResponse;
+  }
+
   if (!hasEnvVars) {
     return apiError("auth-required", "Sign in to submit check-ins.", 401);
   }
@@ -33,6 +39,15 @@ export async function POST(request: Request) {
 
     if (error || !userId) {
       return apiError("auth-required", "Sign in to submit check-ins.", 401);
+    }
+
+    const userRateLimitResponse = await rateLimitResponse(
+      request,
+      "check-ins-submit-user",
+      userId,
+    );
+    if (userRateLimitResponse) {
+      return userRateLimitResponse;
     }
 
     const checkIn = await submitRoutineCheckIn(supabase, userId, input);

@@ -1,5 +1,6 @@
 import { apiError, apiOk } from "@/lib/api/response";
 import { buildAnalyticsEvent } from "@/lib/analytics/events";
+import { rateLimitResponse } from "@/lib/rate-limit";
 import { trackAnalyticsEvent } from "@/lib/supabase/routine-actions";
 import { trackProductClick } from "@/lib/supabase/routine-actions";
 import { createClient } from "@/lib/supabase/server";
@@ -10,6 +11,12 @@ const uuidPattern =
 const allowedLinkStatuses = new Set(["available", "stale", "unavailable", "unknown"]);
 
 export async function POST(request: Request) {
+  const rateLimited = await rateLimitResponse(request, "product-actions-click");
+
+  if (rateLimited) {
+    return rateLimited;
+  }
+
   let body: Record<string, unknown>;
 
   try {

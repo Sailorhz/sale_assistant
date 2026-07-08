@@ -1,10 +1,17 @@
 import { apiError, apiOk } from "@/lib/api/response";
 import { buildAnalyticsEvent } from "@/lib/analytics/events";
+import { rateLimitResponse } from "@/lib/rate-limit";
 import { logSafetyEvent, trackAnalyticsEvent } from "@/lib/supabase/routine-actions";
 import { createClient } from "@/lib/supabase/server";
 import { hasEnvVars } from "@/lib/utils";
 
 export async function POST(request: Request) {
+  const rateLimited = await rateLimitResponse(request, "safety-events-report");
+
+  if (rateLimited) {
+    return rateLimited;
+  }
+
   let body: Record<string, unknown>;
 
   try {
