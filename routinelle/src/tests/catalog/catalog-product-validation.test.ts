@@ -61,6 +61,10 @@ export const catalogValidationFixtures = {
   }),
   unsafeFitProduct: catalogEligibilityApiResult({
     ...baseProduct,
+    cautionTags: ["fragrance-heavy"],
+  }),
+  sensitiveExcludedButEligibleProduct: catalogEligibilityApiResult({
+    ...baseProduct,
     cautionTags: ["strong-active"],
   }),
 };
@@ -88,5 +92,9 @@ describe("catalogEligibilityApiResult", () => {
     expect(catalogValidationFixtures.unavailableProduct.ok).toBe(false);
     expect(catalogValidationFixtures.staleProduct.ok).toBe(false);
     expect(catalogValidationFixtures.unsafeFitProduct.ok).toBe(false);
+  });
+
+  it("does not hard-block strong-active/avoid-sensitive products (handled per-user in product-matching instead)", () => {
+    expect(catalogValidationFixtures.sensitiveExcludedButEligibleProduct.ok).toBe(true);
   });
 });

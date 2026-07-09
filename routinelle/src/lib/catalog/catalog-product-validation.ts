@@ -27,12 +27,12 @@ export type CatalogEligibilityResult = {
   issues: CatalogValidationIssue[];
 };
 
-const unsafeCautionTags = new Set([
-  "avoid-sensitive",
-  "strong-active",
-  "fragrance-heavy",
-  "essential-oils",
-]);
+// "strong-active" / "avoid-sensitive" are deliberately NOT here: those are
+// handled as a sensitivity-conditional exclusion in product-matching.ts's
+// skinFitMatches, which shows them to non-sensitive users and hides them
+// from sensitive-flagged ones. Blocking them here too would make them
+// ineligible for everyone, unconditionally, defeating that per-user logic.
+const unsafeCautionTags = new Set(["fragrance-heavy", "essential-oils"]);
 
 function isBlank(value: string | null | undefined) {
   return value === null || value === undefined || value.trim().length === 0;
