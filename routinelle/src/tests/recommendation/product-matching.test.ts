@@ -97,4 +97,18 @@ describe("matchProductOptions budget ranking", () => {
 
     expect(options.map((option) => option.productId)).toEqual(["low-1"]);
   });
+
+  it("ranks both premium and luxury bands ahead of low-band backfill for a premium budget", () => {
+    const premiumProfile: OnboardingAnswers = { ...profile, budget: "premium" };
+    const products: CatalogProduct[] = [
+      { ...baseProduct, id: "low-1", productName: "Low A", priceBand: "low", price: { amountMinor: 500, currency: "EUR" } },
+      { ...baseProduct, id: "moderate-1", productName: "Moderate A", priceBand: "moderate", price: { amountMinor: 1500, currency: "EUR" } },
+      { ...baseProduct, id: "luxury-1", productName: "Luxury A", priceBand: "luxury", price: { amountMinor: 15000, currency: "EUR" } },
+      { ...baseProduct, id: "premium-1", productName: "Premium A", priceBand: "premium", price: { amountMinor: 5000, currency: "EUR" } },
+    ];
+
+    const options = matchProductOptions(products, premiumProfile, "cleanser");
+
+    expect(options.map((option) => option.productId)).toEqual(["premium-1", "luxury-1", "low-1"]);
+  });
 });

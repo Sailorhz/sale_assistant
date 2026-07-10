@@ -7,6 +7,7 @@ import type {
 } from "@/lib/domain/explanation";
 import type { GeneratedRoutine, RoutineProductOption, RoutineStep } from "@/lib/domain/routine";
 import type { OnboardingAnswers } from "@/lib/domain/skin-profile";
+import { budgetBands } from "@/lib/recommendation/product-matching";
 import { isApprovedCosmeticCopy } from "@/lib/safety/claim-guardrails";
 
 const stepPurpose: Record<RoutineStep["role"], string> = {
@@ -23,7 +24,14 @@ function fitBadges(option: RoutineProductOption, profile: OnboardingAnswers): Pr
     badges.push("hydration-support", "barrier-friendly");
   }
 
-  if (profile.budget === "notSure" || profile.budget === "flexible" || option.priceBand === profile.budget || option.priceBand === "low") {
+  const budgetFits =
+    profile.budget === "notSure" ||
+    !profile.budget ||
+    profile.budget === "flexible" ||
+    budgetBands(profile.budget).includes(option.priceBand) ||
+    option.priceBand === "low";
+
+  if (budgetFits) {
     badges.push("budget-fit");
   }
 

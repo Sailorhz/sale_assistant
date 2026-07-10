@@ -33,6 +33,7 @@ const priceBands: Array<Exclude<CatalogPriceBand, "unknown">> = [
   "low",
   "moderate",
   "premium",
+  "luxury",
 ];
 
 function fitsPriorityProfile(

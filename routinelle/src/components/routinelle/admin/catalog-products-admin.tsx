@@ -339,7 +339,7 @@ export function CatalogProductsAdmin({
               }
               className="min-h-11 w-full rounded-md border border-input bg-white px-3 py-2"
             >
-              {["low", "moderate", "premium", "unknown"].map((value) => (
+              {["low", "moderate", "premium", "luxury", "unknown"].map((value) => (
                 <option key={value} value={value}>
                   {value}
                 </option>

@@ -24,7 +24,7 @@ export type CatalogAvailabilityStatus =
   | "unavailable"
   | "unknown";
 
-export type CatalogPriceBand = "low" | "moderate" | "premium" | "unknown";
+export type CatalogPriceBand = "low" | "moderate" | "premium" | "luxury" | "unknown";
 
 export type CatalogSizeUnit = "ml" | "g" | "oz" | "unit";
 

@@ -9,12 +9,22 @@ function marketMatches(product: CatalogProduct, profile: OnboardingAnswers) {
     : product.market === profile.localMarket;
 }
 
+/**
+ * Bands a chosen budget preference is willing to see, beyond its own name.
+ * "premium" also surfaces "luxury" products -- there is no separate onboarding
+ * choice for true luxury/prestige brands, so a premium budget is treated as
+ * "the nicer stuff", spanning both tiers.
+ */
+export function budgetBands(budget: Exclude<OnboardingAnswers["budget"], "flexible" | "notSure" | null>) {
+  return budget === "premium" ? ["premium", "luxury"] : [budget];
+}
+
 function budgetMatches(product: CatalogProduct, profile: OnboardingAnswers) {
   if (profile.budget === "notSure" || !profile.budget || profile.budget === "flexible") {
     return true;
   }
 
-  return product.priceBand === profile.budget || product.priceBand === "low";
+  return budgetBands(profile.budget).includes(product.priceBand) || product.priceBand === "low";
 }
 
 function stepMatches(product: CatalogProduct, role: RoutineStepRole) {
@@ -37,7 +47,7 @@ function budgetRank(product: CatalogProduct, profile: OnboardingAnswers) {
     return 0;
   }
 
-  return product.priceBand === profile.budget ? 0 : 1;
+  return budgetBands(profile.budget).includes(product.priceBand) ? 0 : 1;
 }
 
 function skinFitMatches(product: CatalogProduct, profile: OnboardingAnswers) {
