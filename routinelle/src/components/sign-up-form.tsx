@@ -106,6 +106,17 @@ export function SignUpForm({
                 />
               </div>
               {error && <p className="text-sm text-red-500">{error}</p>}
+              <p className="text-muted-foreground text-xs leading-5">
+                By creating an account, you agree to our{" "}
+                <Link href="/terms" className="underline underline-offset-4">
+                  Terms of Service
+                </Link>{" "}
+                and{" "}
+                <Link href="/privacy" className="underline underline-offset-4">
+                  Privacy Policy
+                </Link>
+                .
+              </p>
               <Button type="submit" className="w-full" disabled={isLoading}>
                 {isLoading ? "Creating an account..." : "Sign up"}
               </Button>

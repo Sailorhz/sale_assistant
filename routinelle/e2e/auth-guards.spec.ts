@@ -8,3 +8,13 @@ test.describe("unauthenticated redirects", () => {
     });
   }
 });
+
+test.describe("legal pages stay public", () => {
+  for (const path of ["/privacy", "/terms"]) {
+    test(`${path} is reachable without signing in`, async ({ page }) => {
+      const response = await page.goto(path, { waitUntil: "networkidle" });
+      expect(response?.status()).toBe(200);
+      await expect(page).toHaveURL(new RegExp(`${path}$`));
+    });
+  }
+});

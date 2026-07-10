@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { ThemeProvider } from "next-themes";
+import { SiteFooter } from "@/components/site-footer";
 import "./globals.css";
 
 const defaultUrl = process.env.VERCEL_URL
@@ -30,6 +31,7 @@ export default function RootLayout({
             Skip to main content
           </a>
           {children}
+          <SiteFooter />
         </ThemeProvider>
       </body>
     </html>
