@@ -233,6 +233,7 @@ export const onboardingQuestions: OnboardingQuestion[] = [
     options: [
       { value: "low", label: "Low" },
       { value: "moderate", label: "Moderate" },
+      { value: "premium", label: "Premium" },
       { value: "flexible", label: "Flexible" },
       { value: "notSure", label: "Not sure", confidence: "unknown" },
     ],

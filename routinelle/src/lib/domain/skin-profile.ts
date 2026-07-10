@@ -22,7 +22,7 @@ export type SensitivityTendency =
   | "currentlyUncomfortable"
   | "notSure";
 
-export type BudgetPreference = "low" | "moderate" | "flexible" | "notSure";
+export type BudgetPreference = "low" | "moderate" | "premium" | "flexible" | "notSure";
 
 export type LocalMarket = "france" | "eu" | "uk" | "us" | "other" | "notSure";
 
