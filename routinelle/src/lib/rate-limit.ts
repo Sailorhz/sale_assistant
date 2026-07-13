@@ -34,7 +34,8 @@ export type RateLimitBucket =
   | "check-ins-submit-user"
   | "safety-events-report"
   | "analytics-events"
-  | "product-actions-click";
+  | "product-actions-click"
+  | "onboarding-photo-suggestion";
 
 export const RATE_LIMITS: Record<RateLimitBucket, RateLimitBucketConfig> = {
   "routines-generate": { scope: "ip", limit: 20, window: "60 s" },
@@ -45,6 +46,10 @@ export const RATE_LIMITS: Record<RateLimitBucket, RateLimitBucketConfig> = {
   "safety-events-report": { scope: "ip", limit: 20, window: "60 s" },
   "analytics-events": { scope: "ip", limit: 60, window: "60 s" },
   "product-actions-click": { scope: "ip", limit: 40, window: "60 s" },
+  // Unlike the buckets above (free internal work), this one maps directly to
+  // a paid external API call per hit -- illustrative limit, tighten once a
+  // real per-call cost is known (see plan's "open items").
+  "onboarding-photo-suggestion": { scope: "ip", limit: 6, window: "600 s" },
 };
 
 export type RateLimitCheckResult =

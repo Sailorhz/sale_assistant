@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 
+import { PhotoSuggestionStep } from "@/components/routinelle/onboarding/photo-suggestion-step";
 import { RoutineView } from "@/components/routinelle/routine/routine-view";
 import { Button } from "@/components/ui/button";
 import {
@@ -230,6 +231,7 @@ function SummarySection({
 }
 
 export function OnboardingFlow() {
+  const [photoStepVisible, setPhotoStepVisible] = useState(true);
   const [answers, setAnswers] = useState<OnboardingAnswers>(
     emptyOnboardingAnswers,
   );
@@ -535,6 +537,23 @@ export function OnboardingFlow() {
         id="main-content"
         className="flex flex-1 items-center py-8 sm:py-10"
       >
+        {photoStepVisible ? (
+          <PhotoSuggestionStep
+            onAccept={(suggestion) => {
+              setAnswers((current) => ({
+                ...current,
+                ...(suggestion.skinType
+                  ? { skinType: suggestion.skinType as OnboardingAnswers["skinType"] }
+                  : {}),
+                ...(suggestion.concerns && suggestion.concerns.length > 0
+                  ? { concerns: suggestion.concerns as OnboardingAnswers["concerns"] }
+                  : {}),
+              }));
+              setPhotoStepVisible(false);
+            }}
+            onSkip={() => setPhotoStepVisible(false)}
+          />
+        ) : (
         <Card className="w-full rounded-lg border-[#d8d0c3] bg-white/90 shadow-none">
           <CardHeader className="space-y-4">
             <div className="space-y-2">
@@ -757,6 +776,7 @@ export function OnboardingFlow() {
             ) : null}
           </CardContent>
         </Card>
+        )}
       </main>
     </div>
   );

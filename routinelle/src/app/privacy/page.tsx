@@ -5,7 +5,7 @@ export const metadata: Metadata = {
   title: "Privacy Policy | Routinelle",
 };
 
-const LAST_UPDATED = "2026-07-10";
+const LAST_UPDATED = "2026-07-13";
 
 export default function PrivacyPolicyPage() {
   return (
@@ -93,9 +93,40 @@ export default function PrivacyPolicyPage() {
             </li>
           </ul>
           <p>
-            We do <strong>not</strong> request camera access, photo library
-            access, or precise location for any recommendation in the
-            current version of the app.
+            We do <strong>not</strong> request precise location for any
+            recommendation in the current version of the app. Camera and
+            photo upload access is optional and only requested if you choose
+            the photo-based skin type suggestion feature described below.
+          </p>
+        </Section>
+
+        <Section title="Optional photo-based skin type suggestion">
+          <p>
+            During onboarding, you can optionally take or upload a photo so
+            we can suggest your skin type (and possibly a couple of visible
+            concerns), instead of answering that question manually. This is
+            entirely optional and requires a separate, specific consent at
+            the point you choose to use it -- it is not bundled into the
+            account-page consent choices described below.
+          </p>
+          <p>
+            If you use this feature, the photo is sent once to a third-party
+            vision AI service (Anthropic) for analysis and is{" "}
+            <strong>not saved by Routinelle</strong> -- it does not appear
+            anywhere in your account data, and there is no photo-deletion
+            control because there is no stored photo to delete. Only the
+            resulting suggested answer is kept, and you review it (and can
+            change it) before continuing, exactly like any other onboarding
+            answer.
+          </p>
+          <p>
+            The analysis is a cosmetic-only visual impression (for example,
+            an oily/dry/balanced impression, or visible redness or
+            blemishes) -- it is never a medical diagnosis. If the photo
+            shows something that looks like it needs a dermatologist rather
+            than a skincare routine, we tell you that instead of attempting
+            a cosmetic classification; this does not affect or replace the
+            separate safety questions later in onboarding.
           </p>
         </Section>
 
@@ -151,6 +182,12 @@ export default function PrivacyPolicyPage() {
             <li>
               <strong>Sentry</strong> -- error monitoring, configured as
               described above.
+            </li>
+            <li>
+              <strong>Anthropic</strong> -- vision AI analysis, only if you
+              choose the optional photo-based skin type suggestion feature.
+              Receives the photo for one-time analysis; Routinelle does not
+              retain the photo itself, as described above.
             </li>
           </ul>
           <p>
