@@ -38,7 +38,20 @@ test.describe.serial("consumer journey", () => {
       await passwordInputs.nth(0).fill(password);
       await passwordInputs.nth(1).fill(password);
       await page.getByRole("button", { name: /Sign up|Create account/i }).click();
-      await page.waitForTimeout(1500);
+
+      const inlineError = page.locator("p.text-red-500");
+      await Promise.race([
+        page.waitForURL(/\/auth\/sign-up-success/, { timeout: 15_000 }),
+        inlineError.waitFor({ state: "visible", timeout: 15_000 }),
+      ]).catch(() => {});
+
+      if (!page.url().includes("/auth/sign-up-success")) {
+        const errorText = await inlineError.textContent().catch(() => null);
+        throw new Error(
+          `Signup did not reach the success page. Current URL: ${page.url()}. ` +
+            `Inline error shown: ${errorText ?? "(none)"}`,
+        );
+      }
     });
 
     await test.step("confirm the email (no inbox in CI, same as a clicked confirmation link)", async () => {
