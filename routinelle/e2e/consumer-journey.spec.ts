@@ -33,11 +33,22 @@ test.describe.serial("consumer journey", () => {
 
     await test.step("real signup form creates the account", async () => {
       await page.goto("/auth/sign-up", { waitUntil: "networkidle" });
+
+      const signupRequest = page
+        .waitForRequest((req) => req.url().includes("/auth/v1/signup"), { timeout: 15_000 })
+        .catch(() => null);
+
       await page.fill('input[type="email"]', email);
       const passwordInputs = page.locator('input[type="password"]');
       await passwordInputs.nth(0).fill(password);
       await passwordInputs.nth(1).fill(password);
       await page.getByRole("button", { name: /Sign up|Create account/i }).click();
+
+      const request = await signupRequest;
+      console.log(
+        `[e2e diagnostic] signup request went to: ${request?.url() ?? "(no /auth/v1/signup request observed)"}`,
+      );
+      console.log(`[e2e diagnostic] expected NEXT_PUBLIC_SUPABASE_URL: ${process.env.NEXT_PUBLIC_SUPABASE_URL}`);
 
       const inlineError = page.locator("p.text-red-500");
       await Promise.race([
