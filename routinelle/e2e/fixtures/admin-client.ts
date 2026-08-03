@@ -37,13 +37,17 @@ export type E2ESupabaseAdmin = ReturnType<typeof createE2EAdminClient>;
 async function findUserByEmailOnce(admin: E2ESupabaseAdmin, email: string) {
   let page = 1;
   let seen = 0;
+  // Supabase lowercases stored emails; compare case-insensitively so a
+  // differently-cased caller (or a mixed-case env var somewhere) still finds
+  // the right account instead of silently matching nothing.
+  const target = email.toLowerCase();
 
   for (;;) {
     const { data, error } = await admin.auth.admin.listUsers({ page, perPage: 200 });
     if (error) throw error;
 
     seen += data.users.length;
-    const found = data.users.find((user) => user.email === email);
+    const found = data.users.find((user) => user.email?.toLowerCase() === target);
     if (found) return { found, seen };
     if (data.users.length < 200) return { found: null, seen };
 

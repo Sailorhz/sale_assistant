@@ -15,7 +15,12 @@ function buildTestEmail(runId: string) {
   }
 
   const [localPart, domain] = base.split("@");
-  return `${localPart}+e2e-${runId}@${domain}`;
+  // Supabase lowercases stored emails, so keep this consistently lowercase
+  // too -- otherwise a mixed-case E2E_SIGNUP_EMAIL_BASE (e.g. the GitHub
+  // secret typed with different casing than a local .env.local) makes every
+  // later exact-string lookup silently fail to find the account it just
+  // created.
+  return `${localPart}+e2e-${runId}@${domain}`.toLowerCase();
 }
 
 const runId = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
@@ -33,46 +38,11 @@ test.describe.serial("consumer journey", () => {
 
     await test.step("real signup form creates the account", async () => {
       await page.goto("/auth/sign-up", { waitUntil: "networkidle" });
-
-      const signupRequest = page
-        .waitForRequest((req) => req.url().includes("/auth/v1/signup"), { timeout: 15_000 })
-        .catch(() => null);
-      const signupResponse = page
-        .waitForResponse((res) => res.url().includes("/auth/v1/signup"), { timeout: 15_000 })
-        .catch(() => null);
-
       await page.fill('input[type="email"]', email);
       const passwordInputs = page.locator('input[type="password"]');
       await passwordInputs.nth(0).fill(password);
       await passwordInputs.nth(1).fill(password);
       await page.getByRole("button", { name: /Sign up|Create account/i }).click();
-
-      const [request, response] = await Promise.all([signupRequest, signupResponse]);
-      const actualUrl = request?.url() ?? null;
-      const expectedBase = process.env.NEXT_PUBLIC_SUPABASE_URL ?? null;
-
-      console.log(`[e2e diagnostic] request captured: ${actualUrl !== null}`);
-      console.log(`[e2e diagnostic] response captured: ${response !== null}, status: ${response?.status() ?? "n/a"}`);
-      console.log(
-        `[e2e diagnostic] url length: ${actualUrl?.length ?? "n/a"}, expected base length: ${expectedBase?.length ?? "n/a"}`,
-      );
-      console.log(
-        `[e2e diagnostic] url starts with expected base (raw): ${actualUrl !== null && expectedBase !== null && actualUrl.startsWith(expectedBase)}`,
-      );
-      console.log(
-        `[e2e diagnostic] expected base has stray whitespace: ${expectedBase !== null && expectedBase !== expectedBase.trim()}`,
-      );
-
-      let body: { user?: { id?: string; email?: string } } | null = null;
-      try {
-        body = response ? await response.json() : null;
-      } catch {
-        body = null;
-      }
-      console.log(
-        `[e2e diagnostic] response has user: ${!!body?.user}, user id present: ${!!body?.user?.id}, ` +
-          `user email matches expected: ${body?.user?.email === email}`,
-      );
 
       const inlineError = page.locator("p.text-red-500");
       await Promise.race([
