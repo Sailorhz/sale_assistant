@@ -37,7 +37,15 @@ const DEFAULTS: Required<OnboardingProfile> = {
  * profile stays a plain, non-safety-blocked, non-gentle-start case unless
  * the caller overrides sensitivity to trigger that path deliberately.
  */
+async function skipPhotoStep(page: Page) {
+  const skipButton = page.getByRole("button", { name: "Skip, I'll answer questions" });
+  if (await skipButton.isVisible().catch(() => false)) {
+    await skipButton.click();
+  }
+}
+
 export async function completeOnboarding(page: Page, overrides: OnboardingProfile = {}) {
+  await skipPhotoStep(page);
   const profile = { ...DEFAULTS, ...overrides };
   const answers = [
     profile.skinType,

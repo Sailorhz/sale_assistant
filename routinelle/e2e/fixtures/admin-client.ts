@@ -1,4 +1,5 @@
 import { createClient } from "@supabase/supabase-js";
+import ws from "ws";
 
 function requiredEnv(name: string): string {
   const value = process.env[name];
@@ -24,6 +25,10 @@ export function createE2EAdminClient() {
 
   return createClient(url, serviceRoleKey, {
     auth: { autoRefreshToken: false, persistSession: false },
+    // Node 20 (pinned in CI) has no native WebSocket; realtime-js needs one
+    // supplied explicitly even though this admin client never subscribes to
+    // realtime channels -- it's constructed eagerly regardless.
+    realtime: { transport: ws as never },
   });
 }
 
