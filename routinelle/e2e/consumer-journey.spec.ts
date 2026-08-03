@@ -37,6 +37,9 @@ test.describe.serial("consumer journey", () => {
       const signupRequest = page
         .waitForRequest((req) => req.url().includes("/auth/v1/signup"), { timeout: 15_000 })
         .catch(() => null);
+      const signupResponse = page
+        .waitForResponse((res) => res.url().includes("/auth/v1/signup"), { timeout: 15_000 })
+        .catch(() => null);
 
       await page.fill('input[type="email"]', email);
       const passwordInputs = page.locator('input[type="password"]');
@@ -44,11 +47,32 @@ test.describe.serial("consumer journey", () => {
       await passwordInputs.nth(1).fill(password);
       await page.getByRole("button", { name: /Sign up|Create account/i }).click();
 
-      const request = await signupRequest;
+      const [request, response] = await Promise.all([signupRequest, signupResponse]);
+      const actualUrl = request?.url() ?? null;
+      const expectedBase = process.env.NEXT_PUBLIC_SUPABASE_URL ?? null;
+
+      console.log(`[e2e diagnostic] request captured: ${actualUrl !== null}`);
+      console.log(`[e2e diagnostic] response captured: ${response !== null}, status: ${response?.status() ?? "n/a"}`);
       console.log(
-        `[e2e diagnostic] signup request went to: ${request?.url() ?? "(no /auth/v1/signup request observed)"}`,
+        `[e2e diagnostic] url length: ${actualUrl?.length ?? "n/a"}, expected base length: ${expectedBase?.length ?? "n/a"}`,
       );
-      console.log(`[e2e diagnostic] expected NEXT_PUBLIC_SUPABASE_URL: ${process.env.NEXT_PUBLIC_SUPABASE_URL}`);
+      console.log(
+        `[e2e diagnostic] url starts with expected base (raw): ${actualUrl !== null && expectedBase !== null && actualUrl.startsWith(expectedBase)}`,
+      );
+      console.log(
+        `[e2e diagnostic] expected base has stray whitespace: ${expectedBase !== null && expectedBase !== expectedBase.trim()}`,
+      );
+
+      let body: { user?: { id?: string; email?: string } } | null = null;
+      try {
+        body = response ? await response.json() : null;
+      } catch {
+        body = null;
+      }
+      console.log(
+        `[e2e diagnostic] response has user: ${!!body?.user}, user id present: ${!!body?.user?.id}, ` +
+          `user email matches expected: ${body?.user?.email === email}`,
+      );
 
       const inlineError = page.locator("p.text-red-500");
       await Promise.race([
@@ -67,7 +91,7 @@ test.describe.serial("consumer journey", () => {
 
     await test.step("confirm the email (no inbox in CI, same as a clicked confirmation link)", async () => {
       const admin = createE2EAdminClient();
-      const user = await findUserByEmail(admin, email);
+      const user = await findUserByEmail(admin, email, { attempts: 6, delayMs: 1000 });
       expect(user, `signup should have created a user for ${email}`).not.toBeNull();
       const { error } = await admin.auth.admin.updateUserById(user!.id, { email_confirm: true });
       expect(error).toBeNull();

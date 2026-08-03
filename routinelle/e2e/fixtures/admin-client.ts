@@ -34,19 +34,49 @@ export function createE2EAdminClient() {
 
 export type E2ESupabaseAdmin = ReturnType<typeof createE2EAdminClient>;
 
-export async function findUserByEmail(admin: E2ESupabaseAdmin, email: string) {
+async function findUserByEmailOnce(admin: E2ESupabaseAdmin, email: string) {
   let page = 1;
+  let seen = 0;
 
   for (;;) {
     const { data, error } = await admin.auth.admin.listUsers({ page, perPage: 200 });
     if (error) throw error;
 
+    seen += data.users.length;
     const found = data.users.find((user) => user.email === email);
-    if (found) return found;
-    if (data.users.length < 200) return null;
+    if (found) return { found, seen };
+    if (data.users.length < 200) return { found: null, seen };
 
     page += 1;
   }
+}
+
+/**
+ * Retries a few times with a short delay: signup and the admin listUsers
+ * lookup go through separate Supabase clients (anon vs service-role), and a
+ * single immediate lookup can occasionally lose a race against propagation.
+ */
+export async function findUserByEmail(
+  admin: E2ESupabaseAdmin,
+  email: string,
+  options: { attempts?: number; delayMs?: number } = {},
+) {
+  const { attempts = 1, delayMs = 1000 } = options;
+  let lastSeen = 0;
+
+  for (let attempt = 1; attempt <= attempts; attempt += 1) {
+    const { found, seen } = await findUserByEmailOnce(admin, email);
+    lastSeen = seen;
+    if (found) return found;
+    if (attempt < attempts) {
+      await new Promise((resolve) => setTimeout(resolve, delayMs));
+    }
+  }
+
+  console.log(
+    `[e2e diagnostic] findUserByEmail exhausted ${attempts} attempt(s), admin client saw ${lastSeen} total user(s), none matched.`,
+  );
+  return null;
 }
 
 export async function createConfirmedUser(
