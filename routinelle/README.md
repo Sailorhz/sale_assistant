@@ -12,10 +12,10 @@ than a skincare routine.
 
 - **Sample routine before signup.** Anyone can see the kind of AM/PM routine
   Routinelle produces, with reasoning, before creating an account.
-- **9-question onboarding**, with an optional photo-based skin-type shortcut
-  (see below) — skin type, concerns, sensitivity, acne/oiliness and
-  irritation/barrier signals, a dedicated safety-signal question, current
-  routine basics, budget, and local market.
+- **9-question onboarding** — skin type, concerns, sensitivity, acne/oiliness
+  and irritation/barrier signals, a dedicated safety-signal question, current
+  routine basics, budget, and local market. (An optional photo-based
+  skin-type shortcut exists in the codebase but is disabled — see below.)
 - **Rule-based routine generation** — no LLM in the recommendation path
   itself. Routines are built from an explicit rules engine over a real
   product catalog (skin fit, budget band, market availability, ingredient
@@ -32,20 +32,21 @@ than a skincare routine.
 - **Admin tooling** for catalog products, catalog governance (copy blocks and
   tags), catalog coverage gaps, and a safety/analytics review dashboard.
 
-### Optional photo-based skin-type suggestion
+### Optional photo-based skin-type suggestion (built, not yet enabled)
 
 During onboarding, instead of manually answering the skin-type question,
-users can optionally take or upload a photo. It's sent once to a vision model
-(Anthropic `claude-haiku-4-5`) for a cosmetic-only impression (skin type and
-maybe visible concerns) — never a diagnosis — and the photo itself is never
-stored anywhere. The suggestion is only ever a pre-filled, editable answer;
-the user reviews it like any other answer before continuing. Requires its
-own explicit, point-of-collection consent, separate from account-level
-privacy consent.
+users could optionally take or upload a photo, sent once to a vision model
+(Anthropic `claude-haiku-4-5`) for a cosmetic-only impression — never a
+diagnosis — with the photo itself never stored anywhere. The code is
+complete and tested (`PhotoSuggestionStep`, `/api/onboarding/photo-suggestion`),
+but it's currently disabled (`PHOTO_STEP_ENABLED = false` in
+`onboarding-flow.tsx`) pending an Anthropic API key and resolution of the
+Article 9 special-category-data questions raised in legal review. The
+screenshot below shows what it looks like when enabled, for reference.
 
 ## Screenshots
 
-| Onboarding entry (photo shortcut, optional) | A manual question |
+| Onboarding entry (photo shortcut, currently disabled) | A manual question |
 | --- | --- |
 | ![Onboarding photo step](docs/screenshots/02-onboarding-photo-step.png) | ![Onboarding question](docs/screenshots/03-onboarding-question.png) |
 
@@ -65,7 +66,8 @@ privacy consent.
   session replay, no default PII capture, given check-in/safety answers are
   health-adjacent)
 - [Anthropic Claude](https://www.anthropic.com/) (`claude-haiku-4-5`) — vision
-  model for the optional photo-based skin-type suggestion only
+  model for the photo-based skin-type suggestion; feature built but disabled
+  pending an API key, see above
 - [Vitest](https://vitest.dev/) for unit tests, [Playwright](https://playwright.dev/)
   for end-to-end tests
 

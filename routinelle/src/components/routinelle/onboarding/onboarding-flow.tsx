@@ -230,8 +230,15 @@ function SummarySection({
   );
 }
 
+// Cut from MVP: the photo-based skin-type shortcut is fully built (see
+// PhotoSuggestionStep and /api/onboarding/photo-suggestion) but not shown to
+// users yet -- the Anthropic API key hasn't been provisioned, and the Article
+// 9 special-category-data questions in the legal review haven't been
+// resolved. Flip this back to `true` once both are cleared.
+const PHOTO_STEP_ENABLED = false;
+
 export function OnboardingFlow() {
-  const [photoStepVisible, setPhotoStepVisible] = useState(true);
+  const [photoStepVisible, setPhotoStepVisible] = useState(PHOTO_STEP_ENABLED);
   const [answers, setAnswers] = useState<OnboardingAnswers>(
     emptyOnboardingAnswers,
   );

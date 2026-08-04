@@ -39,7 +39,7 @@ export const recommendationDataUseSummary: RecommendationDataUseItem[] = [
 
 export const mvpPermissionBoundaries = [
   "No precise location is required; a selected country or market is enough.",
-  "Camera or photo upload is optional, and only used if you choose the photo-based skin type suggestion during onboarding -- the photo itself is never saved.",
+  "No camera or photo upload access is required in the current version of the app.",
 ];
 
 export function emptyPrivacyConsent(): PrivacyConsent {
