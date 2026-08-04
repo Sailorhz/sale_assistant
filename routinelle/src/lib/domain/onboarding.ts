@@ -73,7 +73,7 @@ export const onboardingQuestions: OnboardingQuestion[] = [
       {
         value: "dryCombination",
         label: "Dry-combination",
-        helper: "Dryer cheeks with some oil in the T-zone.",
+        helper: "Drier cheeks with some oil in the T-zone.",
       },
       {
         value: "dry",
@@ -185,7 +185,7 @@ export const onboardingQuestions: OnboardingQuestion[] = [
     kind: "single",
     title: "Would you like to add your current routine basics?",
     helper:
-      "This is optional. It can help later conflict checks, but you can still get a starter routine if you skip.",
+      "This is optional. It can help with later conflict checks, but you can still get a starter routine if you skip.",
     options: [
       {
         value: "addBasics",
@@ -242,7 +242,7 @@ export const onboardingQuestions: OnboardingQuestion[] = [
     id: "localMarket",
     kind: "single",
     title: "Where should products be easy to find?",
-    helper: "For MVP, this helps prepare local availability rules later.",
+    helper: "This helps prepare local availability rules for your market.",
     options: [
       { value: "france", label: "France" },
       { value: "eu", label: "Other EU market" },
