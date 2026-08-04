@@ -43,27 +43,11 @@ test.describe.serial("consumer journey", () => {
 
     await test.step("real signup form creates the account", async () => {
       await page.goto("/auth/sign-up", { waitUntil: "networkidle" });
-
-      const signupResponse = page
-        .waitForResponse((res) => res.url().includes("/auth/v1/signup"), { timeout: 15_000 })
-        .catch(() => null);
-
       await page.fill('input[type="email"]', email);
       const passwordInputs = page.locator('input[type="password"]');
       await passwordInputs.nth(0).fill(password);
       await passwordInputs.nth(1).fill(password);
       await page.getByRole("button", { name: /Sign up|Create account/i }).click();
-
-      const response = await signupResponse;
-      let body: { user?: { id?: string; email?: string } } | null = null;
-      try {
-        body = response ? await response.json() : null;
-      } catch {
-        body = null;
-      }
-      console.log(`[e2e diagnostic] submitted email: "${email}"`);
-      console.log(`[e2e diagnostic] returned email:   "${body?.user?.email ?? "(none)"}"`);
-      console.log(`[e2e diagnostic] returned user id: ${body?.user?.id ?? "(none)"}`);
 
       const inlineError = page.locator("p.text-red-500");
       await Promise.race([
