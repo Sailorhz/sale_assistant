@@ -35,7 +35,8 @@ export type RateLimitBucket =
   | "safety-events-report"
   | "analytics-events"
   | "product-actions-click"
-  | "onboarding-photo-suggestion";
+  | "onboarding-photo-suggestion"
+  | "health-check";
 
 export const RATE_LIMITS: Record<RateLimitBucket, RateLimitBucketConfig> = {
   "routines-generate": { scope: "ip", limit: 20, window: "60 s" },
@@ -50,6 +51,9 @@ export const RATE_LIMITS: Record<RateLimitBucket, RateLimitBucketConfig> = {
   // a paid external API call per hit -- illustrative limit, tighten once a
   // real per-call cost is known (see plan's "open items").
   "onboarding-photo-suggestion": { scope: "ip", limit: 6, window: "600 s" },
+  // Generous on purpose: legitimate uptime monitors may poll every 30-60s,
+  // sometimes from more than one location -- this just caps outright abuse.
+  "health-check": { scope: "ip", limit: 30, window: "60 s" },
 };
 
 export type RateLimitCheckResult =

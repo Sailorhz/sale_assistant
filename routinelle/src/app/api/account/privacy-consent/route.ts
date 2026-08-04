@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import * as Sentry from "@sentry/nextjs";
 
 import {
   recommendationDataUseSummary,
@@ -72,7 +73,8 @@ export async function GET() {
       dataUseSummary: recommendationDataUseSummary,
       permissionBoundaries: mvpPermissionBoundaries,
     });
-  } catch {
+  } catch (error) {
+    Sentry.captureException(error);
     return errorResponse(
       "system-error",
       "Privacy consent is unavailable right now.",
@@ -122,7 +124,8 @@ export async function POST(request: Request) {
       dataUseSummary: recommendationDataUseSummary,
       permissionBoundaries: mvpPermissionBoundaries,
     });
-  } catch {
+  } catch (error) {
+    Sentry.captureException(error);
     return errorResponse(
       "system-error",
       "Privacy consent could not be saved right now.",

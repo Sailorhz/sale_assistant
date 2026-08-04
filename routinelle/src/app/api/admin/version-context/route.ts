@@ -1,3 +1,5 @@
+import * as Sentry from "@sentry/nextjs";
+
 import { apiError, apiOk } from "@/lib/api/response";
 import { isCatalogAdmin } from "@/lib/supabase/catalog-admin";
 import { createClient } from "@/lib/supabase/server";
@@ -52,7 +54,8 @@ export async function GET() {
     ]);
 
     return apiOk({ catalogVersions, ruleVersions });
-  } catch {
+  } catch (error) {
+    Sentry.captureException(error);
     return apiError("system-error", "Version context is unavailable.", 500);
   }
 }
@@ -107,7 +110,8 @@ export async function POST(request: Request) {
         : await createRuleVersion(supabase, row);
 
     return apiOk({ version }, 201);
-  } catch {
+  } catch (error) {
+    Sentry.captureException(error);
     return apiError("system-error", "Version context could not be saved.", 500);
   }
 }

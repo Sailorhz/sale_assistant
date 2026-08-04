@@ -1,3 +1,5 @@
+import * as Sentry from "@sentry/nextjs";
+
 import { apiError, apiOk } from "@/lib/api/response";
 import { buildAnalyticsEvent } from "@/lib/analytics/events";
 import type { RoutineCheckInInput } from "@/lib/domain/check-in";
@@ -71,11 +73,13 @@ export async function POST(request: Request) {
         context: { routineId: input.routineId },
       }).catch((error) => {
         console.error("Failed to log safety event for check-in", error);
+        Sentry.captureException(error);
       });
     }
 
     return apiOk({ checkIn, guidance });
-  } catch {
+  } catch (error) {
+    Sentry.captureException(error);
     return apiError("system-error", "Check-in could not be submitted.", 500);
   }
 }

@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import * as Sentry from "@sentry/nextjs";
 
 import {
   PROFILE_DELETION_CONFIRMATION,
@@ -75,7 +76,8 @@ export async function GET() {
     );
 
     return successResponse(buildAccountDataSummary(deletionRequest));
-  } catch {
+  } catch (error) {
+    Sentry.captureException(error);
     return errorResponse(
       "system-error",
       "Account data is unavailable right now.",
@@ -123,7 +125,8 @@ export async function POST(request: Request) {
     });
 
     return successResponse(buildAccountDataSummary(deletionRequest));
-  } catch {
+  } catch (error) {
+    Sentry.captureException(error);
     return errorResponse(
       "system-error",
       "Profile data deletion could not be requested right now.",

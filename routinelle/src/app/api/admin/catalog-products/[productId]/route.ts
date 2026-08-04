@@ -1,3 +1,5 @@
+import * as Sentry from "@sentry/nextjs";
+
 import { apiError, apiOk } from "@/lib/api/response";
 import {
   catalogProductInputToRow,
@@ -82,7 +84,8 @@ export async function PUT(
     );
 
     return apiOk({ product, eligibility });
-  } catch {
+  } catch (error) {
+    Sentry.captureException(error);
     return apiError("system-error", "Catalog product could not be saved.", 500);
   }
 }

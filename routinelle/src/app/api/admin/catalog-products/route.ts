@@ -1,3 +1,5 @@
+import * as Sentry from "@sentry/nextjs";
+
 import { apiError, apiOk } from "@/lib/api/response";
 import {
   catalogProductInputToRow,
@@ -53,7 +55,8 @@ export async function GET() {
     }
 
     return apiOk({ products: await listCatalogProducts(supabase) });
-  } catch {
+  } catch (error) {
+    Sentry.captureException(error);
     return apiError("system-error", "Catalog products are unavailable.", 500);
   }
 }
@@ -106,7 +109,8 @@ export async function POST(request: Request) {
     );
 
     return apiOk({ product, eligibility }, 201);
-  } catch {
+  } catch (error) {
+    Sentry.captureException(error);
     return apiError("system-error", "Catalog product could not be saved.", 500);
   }
 }

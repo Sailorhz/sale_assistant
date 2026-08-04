@@ -1,3 +1,5 @@
+import * as Sentry from "@sentry/nextjs";
+
 import { apiError, apiOk } from "@/lib/api/response";
 import { buildAnalyticsEvent } from "@/lib/analytics/events";
 import { rateLimitResponse } from "@/lib/rate-limit";
@@ -66,7 +68,8 @@ export async function POST(request: Request) {
     ).catch(() => undefined);
 
     return apiOk({ tracked: true });
-  } catch {
+  } catch (error) {
+    Sentry.captureException(error);
     return apiOk({ tracked: false });
   }
 }

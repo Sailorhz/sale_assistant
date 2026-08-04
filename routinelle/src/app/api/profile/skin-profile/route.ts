@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import * as Sentry from "@sentry/nextjs";
 
 import { buildSkinProfileSummary } from "@/lib/domain/skin-profile-summary";
 import { createClient } from "@/lib/supabase/server";
@@ -98,7 +99,8 @@ export async function PUT(request: Request) {
     });
 
     return successResponse(profile);
-  } catch {
+  } catch (error) {
+    Sentry.captureException(error);
     return errorResponse(
       "system-error",
       "Profile updates could not be saved right now.",

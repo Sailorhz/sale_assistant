@@ -1,3 +1,5 @@
+import * as Sentry from "@sentry/nextjs";
+
 import { apiError, apiOk } from "@/lib/api/response";
 import type { CatalogProduct } from "@/lib/domain/catalog-product";
 import type { RoutineVersionContext } from "@/lib/domain/version-context";
@@ -108,11 +110,13 @@ export async function POST(request: Request) {
         context: { variant: routine.variant },
       }).catch((error) => {
         console.error("Failed to log safety event for onboarding", error);
+        Sentry.captureException(error);
       });
     }
 
     return apiOk({ routine });
-  } catch {
+  } catch (error) {
+    Sentry.captureException(error);
     return apiError("system-error", "Routine could not be generated.", 500);
   }
 }

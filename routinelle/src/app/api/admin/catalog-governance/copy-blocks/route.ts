@@ -1,3 +1,5 @@
+import * as Sentry from "@sentry/nextjs";
+
 import { apiError, apiOk } from "@/lib/api/response";
 import { isCatalogAdmin } from "@/lib/supabase/catalog-admin";
 import {
@@ -47,7 +49,8 @@ export async function GET() {
     }
 
     return apiOk({ copyBlocks: await listApprovedCopyBlocks(supabase) });
-  } catch {
+  } catch (error) {
+    Sentry.captureException(error);
     return apiError("system-error", "Approved copy is unavailable.", 500);
   }
 }
@@ -93,7 +96,8 @@ export async function POST(request: Request) {
       { copyBlock: await createApprovedCopyBlock(supabase, row) },
       201,
     );
-  } catch {
+  } catch (error) {
+    Sentry.captureException(error);
     return apiError("system-error", "Approved copy could not be saved.", 500);
   }
 }

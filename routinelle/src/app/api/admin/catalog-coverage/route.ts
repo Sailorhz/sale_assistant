@@ -1,3 +1,5 @@
+import * as Sentry from "@sentry/nextjs";
+
 import { apiError, apiOk } from "@/lib/api/response";
 import { buildCatalogCoverageReport } from "@/lib/catalog/catalog-coverage";
 import { isCatalogAdmin } from "@/lib/supabase/catalog-admin";
@@ -39,7 +41,8 @@ export async function GET() {
 
     const products = await listCatalogProducts(supabase);
     return apiOk({ coverage: buildCatalogCoverageReport(products) });
-  } catch {
+  } catch (error) {
+    Sentry.captureException(error);
     return apiError("system-error", "Catalog coverage is unavailable.", 500);
   }
 }

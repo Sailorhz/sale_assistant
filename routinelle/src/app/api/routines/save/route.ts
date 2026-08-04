@@ -1,3 +1,5 @@
+import * as Sentry from "@sentry/nextjs";
+
 import { apiError, apiOk } from "@/lib/api/response";
 import { buildAnalyticsEvent } from "@/lib/analytics/events";
 import type { GeneratedRoutine } from "@/lib/domain/routine";
@@ -71,7 +73,8 @@ export async function POST(request: Request) {
     ).catch(() => undefined);
 
     return apiOk({ routine });
-  } catch {
+  } catch (error) {
+    Sentry.captureException(error);
     return apiError("system-error", "Routine could not be saved.", 500);
   }
 }

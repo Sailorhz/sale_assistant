@@ -1,3 +1,5 @@
+import * as Sentry from "@sentry/nextjs";
+
 import { apiError, apiOk } from "@/lib/api/response";
 import { isCatalogAdmin } from "@/lib/supabase/catalog-admin";
 import {
@@ -41,7 +43,8 @@ export async function GET() {
     }
 
     return apiOk({ tags: await listCatalogTags(supabase) });
-  } catch {
+  } catch (error) {
+    Sentry.captureException(error);
     return apiError("system-error", "Catalog tags are unavailable.", 500);
   }
 }
@@ -80,7 +83,8 @@ export async function POST(request: Request) {
     }
 
     return apiOk({ tag: await createCatalogTag(supabase, row) }, 201);
-  } catch {
+  } catch (error) {
+    Sentry.captureException(error);
     return apiError("system-error", "Catalog tag could not be saved.", 500);
   }
 }

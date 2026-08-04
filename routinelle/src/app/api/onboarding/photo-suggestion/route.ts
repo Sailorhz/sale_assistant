@@ -1,3 +1,5 @@
+import * as Sentry from "@sentry/nextjs";
+
 import { apiError, apiOk } from "@/lib/api/response";
 import {
   PHOTO_ANALYSIS_CONSENT_VERSION,
@@ -60,6 +62,7 @@ async function logEvent(result: PhotoAnalysisResult, errorCode: string | null) {
     });
   } catch (error) {
     console.error("Failed to log photo analysis event", error);
+    Sentry.captureException(error);
   }
 }
 
@@ -134,6 +137,7 @@ export async function POST(request: Request) {
     return apiOk(result);
   } catch (error) {
     console.error("Photo analysis call failed", error);
+    Sentry.captureException(error);
     await logEvent(
       { outcome: "declined", message: PHOTO_ANALYSIS_OUTCOME_MESSAGES.declined },
       "anthropic_call_failed",
