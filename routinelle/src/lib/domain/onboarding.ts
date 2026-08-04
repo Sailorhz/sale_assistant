@@ -144,7 +144,7 @@ export const onboardingQuestions: OnboardingQuestion[] = [
   {
     id: "irritationBarrierSignals",
     kind: "multi",
-    title: "Which comfort signals happen with your skin?",
+    title: "Which discomfort signals happen with your skin?",
     helper:
       "Routinelle uses this to keep cosmetic routine guidance gentle when needed.",
     maxSelections: 5,
