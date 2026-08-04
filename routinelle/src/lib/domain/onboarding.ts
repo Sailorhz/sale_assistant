@@ -231,9 +231,21 @@ export const onboardingQuestions: OnboardingQuestion[] = [
     title: "What budget should Routinelle respect?",
     helper: "This guides future product matching without changing your skin priorities.",
     options: [
-      { value: "low", label: "Low" },
-      { value: "moderate", label: "Moderate" },
-      { value: "premium", label: "Premium" },
+      {
+        value: "low",
+        label: "Low",
+        helper: "Everyday drugstore pricing, generally under €15 per product.",
+      },
+      {
+        value: "moderate",
+        label: "Moderate",
+        helper: "Mid-range skincare, roughly €15-35 per product.",
+      },
+      {
+        value: "premium",
+        label: "Premium",
+        helper: "Higher-end and prestige pricing, roughly €35 and up.",
+      },
       { value: "flexible", label: "Flexible" },
       { value: "notSure", label: "Not sure", confidence: "unknown" },
     ],
