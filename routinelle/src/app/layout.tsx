@@ -11,6 +11,9 @@ export const metadata: Metadata = {
   metadataBase: new URL(defaultUrl),
   title: "Routinelle",
   description: "A neutral skincare routine foundation for Routinelle.",
+  other: {
+    "color-scheme": "light",
+  },
 };
 
 export default function RootLayout({
