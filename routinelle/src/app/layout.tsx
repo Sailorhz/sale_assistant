@@ -21,10 +21,18 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className="antialiased">
+        {/*
+          Forced to light: every custom component in this app uses hardcoded
+          light-mode hex colors (no `dark:` variants exist anywhere), but
+          `enableSystem` still auto-applied the unused starter-template dark
+          CSS variables whenever a user's OS was in dark mode -- making any
+          text relying on the inherited --foreground color (near-white in
+          .dark) invisible against those hardcoded light backgrounds.
+        */}
         <ThemeProvider
           attribute="class"
-          defaultTheme="system"
-          enableSystem
+          defaultTheme="light"
+          enableSystem={false}
           disableTransitionOnChange
         >
           <a href="#main-content" className="skip-link">
