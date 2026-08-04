@@ -107,6 +107,11 @@ export function RoutineView({
                             {option.brandName} {option.productName}
                           </span>
                         )}
+                        {option.isBudgetBackfill ? (
+                          <span className="ml-2 text-xs text-[#7a6846]">
+                            (lower-cost option, outside your selected budget)
+                          </span>
+                        ) : null}
                       </li>
                     ))}
                   </ul>

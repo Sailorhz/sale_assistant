@@ -64,7 +64,7 @@ describe("matchProductOptions budget ranking", () => {
     );
   });
 
-  it("still includes low-band backfill when fewer than 3 products match the chosen band", () => {
+  it("still includes low-band backfill when fewer than 3 products match the chosen band, flagged as backfill", () => {
     const products: CatalogProduct[] = [
       { ...baseProduct, id: "low-1", productName: "Low A", priceBand: "low", price: { amountMinor: 500, currency: "EUR" } },
       { ...baseProduct, id: "moderate-1", productName: "Moderate A", priceBand: "moderate", price: { amountMinor: 2000, currency: "EUR" } },
@@ -73,6 +73,8 @@ describe("matchProductOptions budget ranking", () => {
     const options = matchProductOptions(products, profile, "cleanser");
 
     expect(options.map((option) => option.productId)).toEqual(["moderate-1", "low-1"]);
+    expect(options.find((option) => option.productId === "moderate-1")?.isBudgetBackfill).toBe(false);
+    expect(options.find((option) => option.productId === "low-1")?.isBudgetBackfill).toBe(true);
   });
 
   it("falls back to plain price ordering when the user has no explicit budget preference", () => {
@@ -85,6 +87,7 @@ describe("matchProductOptions budget ranking", () => {
     const options = matchProductOptions(products, flexibleProfile, "cleanser");
 
     expect(options.map((option) => option.productId)).toEqual(["low-1", "moderate-1"]);
+    expect(options.every((option) => option.isBudgetBackfill === false)).toBe(true);
   });
 
   it("excludes premium products entirely when the user has an explicit lower budget", () => {
@@ -110,5 +113,8 @@ describe("matchProductOptions budget ranking", () => {
     const options = matchProductOptions(products, premiumProfile, "cleanser");
 
     expect(options.map((option) => option.productId)).toEqual(["premium-1", "luxury-1", "low-1"]);
+    expect(options.find((option) => option.productId === "premium-1")?.isBudgetBackfill).toBe(false);
+    expect(options.find((option) => option.productId === "luxury-1")?.isBudgetBackfill).toBe(false);
+    expect(options.find((option) => option.productId === "low-1")?.isBudgetBackfill).toBe(true);
   });
 });

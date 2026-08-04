@@ -93,5 +93,6 @@ export function matchProductOptions(
       availabilityStatus: product.availabilityStatus,
       fitNotes: product.functionTags.slice(0, 3),
       sourceProductUpdatedAt: product.updatedAt,
+      isBudgetBackfill: budgetRank(product, profile) === 1,
     }));
 }

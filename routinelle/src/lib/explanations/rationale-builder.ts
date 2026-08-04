@@ -7,7 +7,6 @@ import type {
 } from "@/lib/domain/explanation";
 import type { GeneratedRoutine, RoutineProductOption, RoutineStep } from "@/lib/domain/routine";
 import type { OnboardingAnswers } from "@/lib/domain/skin-profile";
-import { budgetBands } from "@/lib/recommendation/product-matching";
 import { isApprovedCosmeticCopy } from "@/lib/safety/claim-guardrails";
 
 const stepPurpose: Record<RoutineStep["role"], string> = {
@@ -24,14 +23,10 @@ function fitBadges(option: RoutineProductOption, profile: OnboardingAnswers): Pr
     badges.push("hydration-support", "barrier-friendly");
   }
 
-  const budgetFits =
-    profile.budget === "notSure" ||
-    !profile.budget ||
-    profile.budget === "flexible" ||
-    budgetBands(profile.budget).includes(option.priceBand) ||
-    option.priceBand === "low";
-
-  if (budgetFits) {
+  // isBudgetBackfill is false whenever the user has no real budget
+  // preference (notSure/flexible/unset), so this already covers those cases
+  // correctly without repeating that check here.
+  if (!option.isBudgetBackfill) {
     badges.push("budget-fit");
   }
 

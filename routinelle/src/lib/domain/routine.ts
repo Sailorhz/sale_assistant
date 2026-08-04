@@ -21,6 +21,13 @@ export type RoutineProductOption = {
   availabilityStatus: string;
   fitNotes: string[];
   sourceProductUpdatedAt: string;
+  /**
+   * True when this option is shown despite not matching the user's selected
+   * budget band -- low-priced options are deliberately never hidden (see
+   * budgetMatches in product-matching.ts), but the UI needs this to explain
+   * why a cheaper item appears instead of silently mixing it in unlabeled.
+   */
+  isBudgetBackfill: boolean;
 };
 
 export type RoutineExplanationReference = {
