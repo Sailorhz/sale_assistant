@@ -6,7 +6,10 @@ shortcut), explains *why* each step was chosen, and stays deliberately
 conservative about anything that looks like it needs a dermatologist rather
 than a skincare routine.
 
-![Landing page](docs/screenshots/01-landing.png)
+The app lives in [`routinelle/`](routinelle/) — this repo's Vercel project
+root directory. All paths below are relative to that folder.
+
+![Landing page](routinelle/docs/screenshots/01-landing.png)
 
 ## What it does
 
@@ -48,13 +51,13 @@ screenshot below shows what it looks like when enabled, for reference.
 
 | Onboarding entry (photo shortcut, currently disabled) | A manual question |
 | --- | --- |
-| ![Onboarding photo step](docs/screenshots/02-onboarding-photo-step.png) | ![Onboarding question](docs/screenshots/03-onboarding-question.png) |
+| ![Onboarding photo step](routinelle/docs/screenshots/02-onboarding-photo-step.png) | ![Onboarding question](routinelle/docs/screenshots/03-onboarding-question.png) |
 
 | Multi-select question | Review before generating a routine |
 | --- | --- |
-| ![Onboarding multiselect](docs/screenshots/04-onboarding-multiselect.png) | ![Onboarding review](docs/screenshots/05-onboarding-review.png) |
+| ![Onboarding multiselect](routinelle/docs/screenshots/04-onboarding-multiselect.png) | ![Onboarding review](routinelle/docs/screenshots/05-onboarding-review.png) |
 
-![Sign in](docs/screenshots/07-login.png)
+![Sign in](routinelle/docs/screenshots/07-login.png)
 
 ## Tech stack
 
@@ -72,6 +75,8 @@ screenshot below shows what it looks like when enabled, for reference.
   for end-to-end tests
 
 ## Project structure
+
+All paths below are relative to `routinelle/`, not the repo root:
 
 ```
 src/app/(consumer)/   Public + consumer-facing screens (onboarding, account, routines)
@@ -95,6 +100,13 @@ e2e/                  Playwright end-to-end suite
 ```
 
 ## Local setup
+
+Clone the repo, then move into the app directory — every command below is
+run from there, not the repo root:
+
+```bash
+cd routinelle
+```
 
 Install dependencies:
 
@@ -166,7 +178,7 @@ products across France/US/UK markets, spanning low/moderate/premium/luxury
 price bands) rather than committed as seed data.
 
 ```bash
-psql "$DATABASE_URL" -f supabase/seed/001_mvp_catalog.sql
+psql "$DATABASE_URL" -f routinelle/supabase/seed/001_mvp_catalog.sql
 ```
 
 If you use the Supabase CLI, `supabase/seed.sql` includes the same seed and
@@ -180,5 +192,5 @@ Guardrails include an allow-listed cosmetic-copy checker
 block a routine entirely in favor of a professional-care message, and a
 "structured signals only" policy for anything health-adjacent (check-ins and
 safety events log fixed-option signals, never free-text symptom
-descriptions). See [`/privacy`](src/app/privacy/page.tsx) and
-[`/terms`](src/app/terms/page.tsx) for the full policies.
+descriptions). See [`/privacy`](routinelle/src/app/privacy/page.tsx) and
+[`/terms`](routinelle/src/app/terms/page.tsx) for the full policies.
