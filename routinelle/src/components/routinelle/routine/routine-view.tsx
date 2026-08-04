@@ -114,7 +114,7 @@ export function RoutineView({
                         )}
                         {option.isBudgetBackfill ? (
                           <span className="ml-2 text-xs text-[#7a6846]">
-                            (lower-cost option, outside your selected budget)
+                            (a more affordable option, shown alongside your selected budget)
                           </span>
                         ) : null}
                         {option.textureMismatchReason ? (
