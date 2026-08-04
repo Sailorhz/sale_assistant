@@ -15,6 +15,34 @@ export function CatalogCoverageView({
         </p>
       </div>
 
+      {coverage.productsMissingShoppingLink.length > 0 ? (
+        <section className="space-y-3" aria-labelledby="missing-link-title">
+          <h2 id="missing-link-title" className="text-lg font-semibold">
+            Published products with no shopping link
+          </h2>
+          <p className="text-sm leading-6 text-[#53685d]">
+            These pass eligibility and are live, but have nothing to click --
+            the routine view falls back to plain text instead of a broken
+            link, so this never shows up as an error anywhere else.
+          </p>
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {coverage.productsMissingShoppingLink.map((entry) => (
+              <div
+                key={entry.productId}
+                className="rounded-lg border border-[#d6c48d] bg-[#fff8e6] p-3 text-sm"
+              >
+                <p className="font-semibold">
+                  {entry.brandName} {entry.productName}
+                </p>
+                <p className="mt-1 text-[#53685d]">
+                  {entry.market} · {entry.routineStep}
+                </p>
+              </div>
+            ))}
+          </div>
+        </section>
+      ) : null}
+
       <section className="space-y-3" aria-labelledby="coverage-gaps-title">
         <h2 id="coverage-gaps-title" className="text-lg font-semibold">
           Priority gaps

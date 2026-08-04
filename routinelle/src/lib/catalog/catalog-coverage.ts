@@ -17,9 +17,18 @@ export type CatalogCoverageCell = {
   hasGap: boolean;
 };
 
+export type CatalogMissingLinkEntry = {
+  productId: string;
+  brandName: string;
+  productName: string;
+  market: CatalogMarket;
+  routineStep: CatalogRoutineStep;
+};
+
 export type CatalogCoverageReport = {
   cells: CatalogCoverageCell[];
   gaps: CatalogCoverageCell[];
+  productsMissingShoppingLink: CatalogMissingLinkEntry[];
 };
 
 const firstMarket: CatalogMarket = "france";
@@ -85,8 +94,23 @@ export function buildCatalogCoverageReport(
     ),
   );
 
+  // A product can be published and pass eligibility while still having no
+  // way for a user to actually buy it -- nothing else checks for that, and
+  // the routine view silently falls back to plain (unlinked) text rather
+  // than showing a broken link, so this gap has no other way to surface.
+  const productsMissingShoppingLink = products
+    .filter((product) => product.publicationStatus === "published" && !product.productUrl)
+    .map((product) => ({
+      productId: product.id,
+      brandName: product.brandName,
+      productName: product.productName,
+      market: product.market,
+      routineStep: product.routineStep,
+    }));
+
   return {
     cells,
     gaps: cells.filter((cell) => cell.hasGap),
+    productsMissingShoppingLink,
   };
 }
