@@ -10,6 +10,10 @@ export type RoutineRecommendationState =
   | "no-safe-match"
   | "safety-blocked";
 
+export type RoutineTextureMismatchReason =
+  | "richer-than-typical-for-oily-skin"
+  | "lighter-than-typical-for-dry-skin";
+
 export type RoutineProductOption = {
   productId: string;
   brandName: string;
@@ -28,6 +32,13 @@ export type RoutineProductOption = {
    * why a cheaper item appears instead of silently mixing it in unlabeled.
    */
   isBudgetBackfill: boolean;
+  /**
+   * Set when this option is shown despite a texture tag that runs against
+   * the user's stated skin type (e.g. a rich-texture product for oily
+   * skin) -- never excluded outright, since it may be the only eligible
+   * option for the step, but the UI needs this to explain why.
+   */
+  textureMismatchReason: RoutineTextureMismatchReason | null;
 };
 
 export type RoutineExplanationReference = {

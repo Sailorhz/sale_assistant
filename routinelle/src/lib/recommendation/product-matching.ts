@@ -1,6 +1,10 @@
 import { evaluateCatalogProductEligibility } from "@/lib/catalog/catalog-product-validation";
 import type { CatalogProduct } from "@/lib/domain/catalog-product";
-import type { RoutineProductOption, RoutineStepRole } from "@/lib/domain/routine";
+import type {
+  RoutineProductOption,
+  RoutineStepRole,
+  RoutineTextureMismatchReason,
+} from "@/lib/domain/routine";
 import type { OnboardingAnswers } from "@/lib/domain/skin-profile";
 
 function marketMatches(product: CatalogProduct, profile: OnboardingAnswers) {
@@ -50,6 +54,48 @@ function budgetRank(product: CatalogProduct, profile: OnboardingAnswers) {
   return budgetBands(profile.budget).includes(product.priceBand) ? 0 : 1;
 }
 
+/**
+ * Texture tags a product can carry in functionTags -- a small, deliberately
+ * narrow vocabulary (not a full texture taxonomy) covering just the mismatch
+ * this exists to catch: a rich cream reaching oily skin, or a very light gel
+ * reaching dry skin, with nothing in between forced to declare either way.
+ */
+const RICH_TEXTURE_TAG = "rich-texture";
+const LIGHTWEIGHT_TEXTURE_TAG = "lightweight-texture";
+
+function isOilyLeaning(skinType: OnboardingAnswers["skinType"]) {
+  return skinType === "oily" || skinType === "oilyCombination";
+}
+
+function isDryLeaning(skinType: OnboardingAnswers["skinType"]) {
+  return skinType === "dry" || skinType === "dryCombination";
+}
+
+/**
+ * Mirrors budgetRank's philosophy: never exclude a texture-mismatched
+ * product outright (it may be the only eligible option for the step), only
+ * rank it behind better-suited options and let the caller explain why it's
+ * there. Returns null when there's no mismatch to explain.
+ */
+function textureMismatchReason(
+  product: CatalogProduct,
+  profile: OnboardingAnswers,
+): RoutineTextureMismatchReason | null {
+  if (isOilyLeaning(profile.skinType) && product.functionTags.includes(RICH_TEXTURE_TAG)) {
+    return "richer-than-typical-for-oily-skin";
+  }
+
+  if (isDryLeaning(profile.skinType) && product.functionTags.includes(LIGHTWEIGHT_TEXTURE_TAG)) {
+    return "lighter-than-typical-for-dry-skin";
+  }
+
+  return null;
+}
+
+function textureRank(product: CatalogProduct, profile: OnboardingAnswers) {
+  return textureMismatchReason(product, profile) ? 1 : 0;
+}
+
 function skinFitMatches(product: CatalogProduct, profile: OnboardingAnswers) {
   const sensitive =
     profile.sensitivity === "oftenSensitive" ||
@@ -75,11 +121,18 @@ export function matchProductOptions(
     .filter((product) => budgetMatches(product, profile))
     .filter((product) => skinFitMatches(product, profile))
     .sort((a, b) => {
-      const rankA = budgetRank(a, profile);
-      const rankB = budgetRank(b, profile);
+      const textureRankA = textureRank(a, profile);
+      const textureRankB = textureRank(b, profile);
+      const budgetRankA = budgetRank(a, profile);
+      const budgetRankB = budgetRank(b, profile);
       const priceA = a.price?.amountMinor ?? Number.MAX_SAFE_INTEGER;
       const priceB = b.price?.amountMinor ?? Number.MAX_SAFE_INTEGER;
-      return rankA - rankB || priceA - priceB || a.productName.localeCompare(b.productName);
+      return (
+        textureRankA - textureRankB ||
+        budgetRankA - budgetRankB ||
+        priceA - priceB ||
+        a.productName.localeCompare(b.productName)
+      );
     })
     .slice(0, 3)
     .map((product) => ({
@@ -94,5 +147,6 @@ export function matchProductOptions(
       fitNotes: product.functionTags.slice(0, 3),
       sourceProductUpdatedAt: product.updatedAt,
       isBudgetBackfill: budgetRank(product, profile) === 1,
+      textureMismatchReason: textureMismatchReason(product, profile),
     }));
 }

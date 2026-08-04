@@ -1,7 +1,12 @@
 "use client";
 
-import type { GeneratedRoutine } from "@/lib/domain/routine";
+import type { GeneratedRoutine, RoutineTextureMismatchReason } from "@/lib/domain/routine";
 import type { RoutineExplanationBundle } from "@/lib/domain/explanation";
+
+const textureMismatchLabel: Record<RoutineTextureMismatchReason, string> = {
+  "richer-than-typical-for-oily-skin": "richer texture than typically suited to oily skin",
+  "lighter-than-typical-for-dry-skin": "lighter texture than typically suited to dry skin",
+};
 
 function trackProductClick(routineId: string, productId: string) {
   void fetch("/api/product-actions/click", {
@@ -110,6 +115,11 @@ export function RoutineView({
                         {option.isBudgetBackfill ? (
                           <span className="ml-2 text-xs text-[#7a6846]">
                             (lower-cost option, outside your selected budget)
+                          </span>
+                        ) : null}
+                        {option.textureMismatchReason ? (
+                          <span className="ml-2 text-xs text-[#7a6846]">
+                            ({textureMismatchLabel[option.textureMismatchReason]})
                           </span>
                         ) : null}
                       </li>

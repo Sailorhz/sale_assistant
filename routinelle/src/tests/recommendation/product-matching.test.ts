@@ -118,3 +118,78 @@ describe("matchProductOptions budget ranking", () => {
     expect(options.find((option) => option.productId === "low-1")?.isBudgetBackfill).toBe(true);
   });
 });
+
+describe("matchProductOptions texture ranking", () => {
+  const moisturizerProduct = { ...baseProduct, routineStep: "hydrate" as const, productCategory: "moisturizer" as const };
+
+  it("ranks a rich-texture product behind a plain one for oily skin, and flags the reason", () => {
+    const oilyProfile: OnboardingAnswers = { ...profile, skinType: "oily" };
+    const products: CatalogProduct[] = [
+      { ...moisturizerProduct, id: "rich-1", productName: "Rich Cream", functionTags: ["hydrating", "rich-texture"], price: { amountMinor: 1000, currency: "EUR" } },
+      { ...moisturizerProduct, id: "gel-1", productName: "Light Gel", functionTags: ["hydrating", "lightweight-texture"], price: { amountMinor: 2000, currency: "EUR" } },
+    ];
+
+    const options = matchProductOptions(products, oilyProfile, "moisturizer");
+
+    expect(options.map((option) => option.productId)).toEqual(["gel-1", "rich-1"]);
+    expect(options.find((option) => option.productId === "rich-1")?.textureMismatchReason).toBe(
+      "richer-than-typical-for-oily-skin",
+    );
+    expect(options.find((option) => option.productId === "gel-1")?.textureMismatchReason).toBeNull();
+  });
+
+  it("still shows a rich-texture product for oily skin if it's the only eligible option -- never fully excluded", () => {
+    const oilyProfile: OnboardingAnswers = { ...profile, skinType: "oily" };
+    const products: CatalogProduct[] = [
+      { ...moisturizerProduct, id: "rich-1", productName: "Rich Cream", functionTags: ["hydrating", "rich-texture"] },
+    ];
+
+    const options = matchProductOptions(products, oilyProfile, "moisturizer");
+
+    expect(options.map((option) => option.productId)).toEqual(["rich-1"]);
+    expect(options[0].textureMismatchReason).toBe("richer-than-typical-for-oily-skin");
+  });
+
+  it("ranks a lightweight-texture product behind a plain one for dry skin", () => {
+    const dryProfile: OnboardingAnswers = { ...profile, skinType: "dry" };
+    const products: CatalogProduct[] = [
+      { ...moisturizerProduct, id: "gel-1", productName: "Light Gel", functionTags: ["hydrating", "lightweight-texture"], price: { amountMinor: 1000, currency: "EUR" } },
+      { ...moisturizerProduct, id: "rich-1", productName: "Rich Cream", functionTags: ["hydrating", "rich-texture"], price: { amountMinor: 2000, currency: "EUR" } },
+    ];
+
+    const options = matchProductOptions(products, dryProfile, "moisturizer");
+
+    expect(options.map((option) => option.productId)).toEqual(["rich-1", "gel-1"]);
+    expect(options.find((option) => option.productId === "gel-1")?.textureMismatchReason).toBe(
+      "lighter-than-typical-for-dry-skin",
+    );
+  });
+
+  it("never flags a texture mismatch for balanced or not-sure skin types", () => {
+    for (const skinType of ["balanced", "notSure"] as const) {
+      const neutralProfile: OnboardingAnswers = { ...profile, skinType };
+      const products: CatalogProduct[] = [
+        { ...moisturizerProduct, id: "rich-1", functionTags: ["hydrating", "rich-texture"] },
+        { ...moisturizerProduct, id: "gel-1", functionTags: ["hydrating", "lightweight-texture"] },
+      ];
+
+      const options = matchProductOptions(products, neutralProfile, "moisturizer");
+
+      expect(options.every((option) => option.textureMismatchReason === null)).toBe(true);
+    }
+  });
+
+  it("ranks texture fit ahead of budget fit when they disagree", () => {
+    const oilyProfile: OnboardingAnswers = { ...profile, skinType: "oily", budget: "moderate" };
+    const products: CatalogProduct[] = [
+      // Matches the chosen budget band exactly, but texturally wrong for oily skin.
+      { ...moisturizerProduct, id: "rich-moderate", priceBand: "moderate", functionTags: ["rich-texture"] },
+      // Only gets through via the low-band-always-shown rule (budget backfill), but texturally right.
+      { ...moisturizerProduct, id: "gel-low", priceBand: "low", functionTags: ["lightweight-texture"] },
+    ];
+
+    const options = matchProductOptions(products, oilyProfile, "moisturizer");
+
+    expect(options.map((option) => option.productId)).toEqual(["gel-low", "rich-moderate"]);
+  });
+});
