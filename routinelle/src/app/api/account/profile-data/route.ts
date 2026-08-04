@@ -5,6 +5,7 @@ import {
   PROFILE_DELETION_CONFIRMATION,
   buildAccountDataSummary,
 } from "@/lib/domain/account-data";
+import { getAccountDataPresence } from "@/lib/supabase/account-data";
 import {
   createProfileDeletionRequest,
   getOpenProfileDeletionRequest,
@@ -70,12 +71,12 @@ export async function GET() {
       );
     }
 
-    const deletionRequest = await getOpenProfileDeletionRequest(
-      supabase,
-      userId,
-    );
+    const [deletionRequest, presence] = await Promise.all([
+      getOpenProfileDeletionRequest(supabase, userId),
+      getAccountDataPresence(supabase, userId),
+    ]);
 
-    return successResponse(buildAccountDataSummary(deletionRequest));
+    return successResponse(buildAccountDataSummary(deletionRequest, presence));
   } catch (error) {
     Sentry.captureException(error);
     return errorResponse(
@@ -114,17 +115,17 @@ export async function POST(request: Request) {
       );
     }
 
-    const deletionRequest = await createProfileDeletionRequest(
-      supabase,
-      userId,
-    );
+    const [deletionRequest, presence] = await Promise.all([
+      createProfileDeletionRequest(supabase, userId),
+      getAccountDataPresence(supabase, userId),
+    ]);
 
     await upsertPrivacyConsent(supabase, userId, {
       profileRoutineStorageConsent: false,
       outcomeTrackingConsent: false,
     });
 
-    return successResponse(buildAccountDataSummary(deletionRequest));
+    return successResponse(buildAccountDataSummary(deletionRequest, presence));
   } catch (error) {
     Sentry.captureException(error);
     return errorResponse(

@@ -20,39 +20,65 @@ export type AccountDataSummary = {
   photoStorageStatus: string;
 };
 
+/** Whether the signed-in user actually has each category of data stored. */
+export type AccountDataPresence = {
+  hasSkinProfile: boolean;
+  hasSavedRoutines: boolean;
+  hasCheckIns: boolean;
+};
+
+function summaryItem(
+  label: string,
+  hasData: boolean,
+  deletionRequest: ProfileDeletionRequest | null,
+  storedDetail: string,
+  notStoredDetail: string,
+  deletedDetail: string,
+): AccountDataSummaryItem {
+  if (deletionRequest) {
+    return { label, status: "Deletion requested", detail: deletedDetail };
+  }
+
+  return {
+    label,
+    status: hasData ? "Stored" : "Not stored",
+    detail: hasData ? storedDetail : notStoredDetail,
+  };
+}
+
 export function buildAccountDataSummary(
   deletionRequest: ProfileDeletionRequest | null,
+  presence: AccountDataPresence,
 ): AccountDataSummary {
-  const deletionStatus = deletionRequest
-    ? "Deletion requested"
-    : "Not stored yet";
-
   return {
     deletionRequest,
     photoStorageStatus:
       "Photos are not stored for MVP recommendations, so there is no photo deletion control here.",
     items: [
-      {
-        label: "Skin profile answers",
-        status: deletionStatus,
-        detail: deletionRequest
-          ? "A deletion request is recorded. Future profile views should not show deleted profile answers."
-          : "Routinelle has not stored skin profile answers yet because onboarding storage is not implemented.",
-      },
-      {
-        label: "Saved routine history",
-        status: deletionStatus,
-        detail: deletionRequest
-          ? "A deletion request is recorded. Future recommendation history should not show deleted profile-linked routines."
-          : "No saved routine history exists yet.",
-      },
-      {
-        label: "Outcome and check-in history",
-        status: deletionStatus,
-        detail: deletionRequest
-          ? "A deletion request is recorded. Future check-in history should not show deleted profile-linked outcomes."
-          : "No check-in or outcome history exists yet.",
-      },
+      summaryItem(
+        "Skin profile answers",
+        presence.hasSkinProfile,
+        deletionRequest,
+        "Your skin profile answers are saved to your account.",
+        "You haven't saved skin profile answers to your account yet -- this is optional and happens when you opt in during onboarding or on this page.",
+        "A deletion request is recorded. Future profile views should not show deleted profile answers.",
+      ),
+      summaryItem(
+        "Saved routine history",
+        presence.hasSavedRoutines,
+        deletionRequest,
+        "At least one generated routine is saved to your account.",
+        "You don't have any saved routine history yet.",
+        "A deletion request is recorded. Future recommendation history should not show deleted profile-linked routines.",
+      ),
+      summaryItem(
+        "Outcome and check-in history",
+        presence.hasCheckIns,
+        deletionRequest,
+        "At least one check-in outcome is saved to your account.",
+        "You don't have any check-in or outcome history yet.",
+        "A deletion request is recorded. Future check-in history should not show deleted profile-linked outcomes.",
+      ),
       {
         label: "Photos",
         status: "Not collected",

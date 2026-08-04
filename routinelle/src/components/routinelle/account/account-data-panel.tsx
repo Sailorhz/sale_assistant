@@ -39,7 +39,11 @@ function formatDate(value: string) {
 }
 
 export function AccountDataPanel() {
-  const fallbackSummary = buildAccountDataSummary(null);
+  const fallbackSummary = buildAccountDataSummary(null, {
+    hasSkinProfile: false,
+    hasSavedRoutines: false,
+    hasCheckIns: false,
+  });
   const [summary, setSummary] = useState<AccountDataSummary>(fallbackSummary);
   const [confirmation, setConfirmation] = useState("");
   const [status, setStatus] = useState<string | null>(null);
@@ -176,10 +180,11 @@ export function AccountDataPanel() {
               Request profile data deletion
             </h2>
             <p className="text-sm leading-6 text-[#53685d]">
-              This records a deletion request for recommendation-related profile
-              data and turns off account storage consent. Routinelle has not
-              stored profile, routine, check-in, or photo data yet, but future
-              profile-linked views must honor this request.
+              This records a deletion request for recommendation-related
+              profile data (skin profile, routines, and check-ins -- photos
+              are never stored in the first place) and turns off account
+              storage consent. Future profile-linked views will honor this
+              request.
             </p>
           </div>
 
