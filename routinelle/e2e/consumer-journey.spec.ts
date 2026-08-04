@@ -5,7 +5,12 @@ import { completeOnboarding, generateRoutine } from "./fixtures/onboarding-helpe
 import { readE2EState } from "./fixtures/state";
 
 function buildTestEmail(runId: string) {
-  const base = process.env.E2E_SIGNUP_EMAIL_BASE;
+  // .trim() matters here: a secret pasted with a trailing newline (easy to
+  // do via a GitHub Actions secret form) silently produces an email with a
+  // literal "\n" before the closing quote -- Supabase trims/normalizes on
+  // its end before storing, so the untrimmed local value then never exactly
+  // matches what comes back, and every later lookup fails to find it.
+  const base = process.env.E2E_SIGNUP_EMAIL_BASE?.trim();
   if (!base) {
     throw new Error(
       "E2E_SIGNUP_EMAIL_BASE is required (e.g. yourname@gmail.com) -- Supabase rejects " +
